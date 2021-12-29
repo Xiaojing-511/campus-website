@@ -1,17 +1,17 @@
 <template>
     <header>
-        <img src="../images/indite-logo.png" alt="" width="150px">
+        <!-- <img src="../images/indite-logo.png" alt="" width="150px"> -->
         <p>I can do everything!</p>
         <nav id="nav-header">
             <ul ref="navUl"> 
                 <li class="menu-item active">
-                    <router-link to="/home">Home</router-link>
+                    <router-link to="/main/home">Home</router-link>
                 </li>
                 <li class="menu-item">
-                    <router-link to="/notes">Notes</router-link> 
+                    <router-link to="/main/notes">Notes</router-link> 
                 </li>
                 <li class="menu-item">
-                    <router-link to="/others">Others</router-link> 
+                    <router-link to="/main/others">Others</router-link> 
                 </li>
             </ul>
         </nav>

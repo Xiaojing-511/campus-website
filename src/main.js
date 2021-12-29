@@ -5,6 +5,7 @@ import store from './store'
 import './css/reset.css'
 // import './css/font.css'
 import './css/media.css'
+import "./api/element";
 Vue.config.productionTip = false
 
 new Vue({
