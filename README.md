@@ -1,24 +1,2 @@
-# campus-website
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+毕业设计 大学生校园网站-前端
+后端：nodeTestProject/koa-project(branch: website)
