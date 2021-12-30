@@ -13,7 +13,11 @@ import {
     Menu,
     MenuItem,
     Table,
-    TableColumn
+    TableColumn,
+    Avatar,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
 } from 'element-ui';
 Vue.use(Form);
 Vue.use(FormItem);
@@ -27,5 +31,9 @@ Vue.use(Menu);
 Vue.use(MenuItem);
 Vue.use(Table);
 Vue.use(TableColumn);
+Vue.use(Avatar);
+Vue.use(Dropdown);
+Vue.use(DropdownItem);
+Vue.use(DropdownMenu);
 Vue.prototype.$message = Message;
 

@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../components/Home.vue';
 import Notes from '../components/Notes.vue';
 import Others from '../components/Others.vue';
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -18,7 +19,7 @@ const routes = [
   {
     path: '/main',
     name: 'Main',
-    redirect: '/login/home',
+    redirect: '/main/home',
     component: () => import(/* webpackChunkName: "Main" */ '../views/Main.vue'),
     children:[
       {
@@ -38,13 +39,23 @@ const routes = [
       },
     ]
   },
-  
+  {
+    path:'*',
+    name: '404',
+    component: () => import(/* webpackChunkName: "404" */ '../views/404.vue')
+  }
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+router.beforeEach((to, from, next) => {
+  const uid = window.localStorage.getItem('uid');
+  if (to.name !== 'Login' && !uid) next({ name: 'Login' })
+  else if(to.name == 'Login' && uid ) next({name: 'Home'})
+  else next()
 })
 
 export default router

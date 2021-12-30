@@ -27,6 +27,7 @@
 </template>
 <script>
 import { getUserLogin,createAccount } from "@/api/communication";
+import { judgeEmptyStr } from '@/api/common';
 export default {
   data() {
     return {
@@ -43,7 +44,7 @@ export default {
     },
     // 注册新账号
     register(){
-      if (!this.judgeEmptyStr(this.userid)&&!this.judgeEmptyStr(this.userpwd)) {
+      if (!judgeEmptyStr(this.userid)&&!judgeEmptyStr(this.userpwd)) {
         createAccount({
           uid: this.userid,
           upwd: this.userpwd
@@ -71,16 +72,14 @@ export default {
             this.userid = this.userpwd = "";
       }
     },
-    judgeEmptyStr(strings){
-      return strings.replace(/(^\s*)|(\s*$)/g, "").length == 0
-    },
     login() {
-      if (!this.judgeEmptyStr(this.userid)&&!this.judgeEmptyStr(this.userpwd)) {
+      if (!judgeEmptyStr(this.userid)&&!judgeEmptyStr(this.userpwd)) {
         getUserLogin({
           uid: this.userid,
           upwd: this.userpwd
         }).then(res => {
           if (res.data.pwdIsTrue) {
+            window.localStorage.setItem('uid',this.userid)
             this.$store.dispatch("setUid", this.userid);
             this.$router.push(`/main/home`);
           } else {
