@@ -3,7 +3,8 @@
         <el-dropdown id="u-avatar" @command="logout">
             <el-avatar class="el-dropdown-link" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
             <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="out">退出登陆</el-dropdown-item>
+                <el-dropdown-item command="user" disabled >{{uid}}</el-dropdown-item>
+                <el-dropdown-item command="out" divided>退出登陆</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown>
         <div id="app">
@@ -17,6 +18,11 @@
 <script>
 import Nav from '../components/Nav'
 export default {
+    data() {
+        return {
+            uid: window.localStorage.getItem('uid')
+        }
+    },
     components:{
         Nav
     },

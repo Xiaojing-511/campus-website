@@ -80,6 +80,7 @@ export default {
         }).then(res => {
           if (res.data.pwdIsTrue) {
             window.localStorage.setItem('uid',this.userid)
+            console.log('当前id',this.userid,window.localStorage);
             this.$store.dispatch("setUid", this.userid);
             this.$router.push(`/main/home`);
           } else {

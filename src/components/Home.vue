@@ -17,7 +17,7 @@
         <section>
             <article v-for="(item) in articles" :key="item.id">
                 <span class="status-info">{{item.uid}}</span>
-                <span class="status-info">{{$moment(Number(item.createTime)).format('YYYY-MM-DD HH:mm:ss')}}</span>
+                <span class="status-info">{{item.createTime}}</span>
                 <p>{{item.contents}}</p>
             </article>
         </section>
@@ -52,6 +52,7 @@ export default {
         getStatus(){
             getAllUserStatus().then(res=>{
                 this.articles = res.data;
+                console.log( this.articles[0].createTime);
             })
         },
         addState(){
@@ -60,7 +61,7 @@ export default {
                     uid: window.localStorage.getItem('uid'),
                     sid: ''+Math.random()*Math.random(),
                     contents: this.newText,
-                    createTime: Date.now()
+                    // createTime: Date.now()
                 };
                 console.log('新动态',obj);
                 createUserStatus(obj).then(res=>{

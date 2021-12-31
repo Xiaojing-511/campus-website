@@ -8,7 +8,7 @@
                     <router-link to="/main/home">Home</router-link>
                 </li>
                 <li class="menu-item">
-                    <router-link to="/main/notes">Notes</router-link> 
+                    <router-link to="/main/chat">Chat</router-link> 
                 </li>
                 <li class="menu-item">
                     <router-link to="/main/others">Others</router-link> 

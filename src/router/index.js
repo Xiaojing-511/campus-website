@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../components/Home.vue';
-import Notes from '../components/Notes.vue';
+import Chat from '../components/Chat.vue';
 import Others from '../components/Others.vue';
 
 Vue.use(VueRouter)
@@ -28,9 +28,9 @@ const routes = [
         component: Home
       },
       {
-        path: 'notes',
-        name: 'Notes',
-        component: Notes
+        path: 'chat',
+        name: 'Chat',
+        component: Chat
       },
       {
         path: 'others',
