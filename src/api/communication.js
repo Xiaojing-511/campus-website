@@ -28,4 +28,25 @@ export const getAllUserStatus = (params) => {
         data: params
     })
 }
+export const createNewChatContents = (params) => {
+    return request({
+        url: '/api/createNewChatContents',
+        method: 'post',
+        data: params
+    })
+}
+export const getChatList = (params) => {
+    return request({
+        url: '/api/queryChatList',
+        method: 'post',
+        data: params
+    })
+}
+export const getUserFriends = (params) => {
+    return request({
+        url: '/api/queryFriends',
+        method: 'post',
+        data: params
+    })
+}
 

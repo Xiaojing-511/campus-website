@@ -2,30 +2,42 @@
     <div id="container">
         <div id="side">
             <ul ref="chatList">
-                <li v-for="item in chatUserList" :key="item.id" class="list-item">{{item.id}}</li>
+                <li v-for="item in chatUserList" :key="item.ufriendId" class="list-item">{{item.ufriendId}}</li>
             </ul>
         </div>
         <div id="content">
             <div id="user-info">
-                <p class="user-name">{{userName}}</p>
+                <p class="user-name">{{receptionId}}</p>
             </div>
             <div id="chat">
                 <ul>
-                    <li v-for="item in chatContentsList" :key="item.cid" :class="[ item.sendid === $store.getters.uid ? 'chat-right' : 'chat-left' ,'chat-content']">
-                        <img class="user-img img-left" v-if="item.sendid !== $store.getters.uid" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="111">
-                        <span>{{item.contents}}</span>
-                        <img class="user-img img-right" v-if="item.sendid === $store.getters.uid" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="111">
+                    <li v-for="item in chatContentsList" :key="item.cid" :class="[ item.sendId === $store.getters.uid ? 'chat-right' : 'chat-left' ,'chat-content']">
+                        <img class="user-img img-left" v-if="item.sendId !== $store.getters.uid" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="111">
+                        <span>{{item.chatContents}}</span>
+                        <img class="user-img img-right" v-if="item.sendId === $store.getters.uid" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="111">
                     </li>
                 </ul>
+            </div>
+            <div id="send-text">
+                <el-input
+                    type="textarea"
+                    placeholder="说点什么..."
+                    v-model="sendText"
+                    maxlength="100"
+                    show-word-limit
+                >
+                </el-input>
+                <el-button class="btn" size="mini" type="primary" round @click="sendMessage">发送</el-button>
             </div>
         </div>
     </div>
 </template>
 <script>
+import {createNewChatContents,getChatList,getUserFriends} from '../api/communication';
 export default {
     data() {
         return {
-            userName: '',
+            receptionId: '',
             chatUserList: [
                 {
                     id: '20185855'
@@ -50,21 +62,33 @@ export default {
                     contents: '能',
                     sendTime: '13:25'
                 },
-            ]
+            ],
+            sendText:'',
         }
     },
     created(){
         this.$store.dispatch('setUid', window.localStorage.getItem('uid'))
-        console.log(this.$store.getters.uid);
-        this.userName = this.chatUserList[0].id;
+        
     },
-    mounted(){
-        this.addLiClick();
+    async mounted(){
+        await getUserFriends({uid: this.$store.getters.uid}).then(res=>{
+                console.log('friends', res);
+                this.chatUserList = res.data;
+                this.receptionId = this.chatUserList[0].ufriendId;
+        });
         const oLis = this.$refs.chatList.getElementsByTagName('li');
         oLis[0].classList.add('active');
+        await getChatList({
+                sendId: this.$store.getters.uid,
+                receptionId: this.receptionId
+            }).then(res=>{
+                console.log('chat contents', res.data);
+                this.chatContentsList = res.data
+            });
+        this.addLiClick();
     },
     methods:{
-        addLiClick(){
+        async addLiClick(){
             const oLis = this.$refs.chatList.getElementsByTagName('li');
             for (let i = 0; i < oLis.length; i++) {
                 oLis[i].onclick = ()=>{
@@ -74,8 +98,47 @@ export default {
                         }
                     }
                     oLis[i].classList.add('active');
-                    this.userName = oLis[i].innerHTML;
+                    this.receptionId = oLis[i].innerHTML;
+                    this.updateChatListHandle();
                 }
+            }
+            console.log('click');
+        },
+        getUserFriends(){
+            getUserFriends({uid: this.$store.getters.uid}).then(res=>{
+                this.chatUserList = res.data;
+                this.receptionId = this.chatUserList[0].ufriendId;
+            })
+        },
+        updateChatListHandle(){
+            getChatList({
+                sendId: this.$store.getters.uid,
+                receptionId: this.receptionId
+            }).then(res=>{
+                this.chatContentsList = res.data
+            })
+        },
+        sendMessage(){
+            if(this.sendText.length === 0){
+                this.$message({
+                    message: "发空的消息是没意思的哦~",
+                    type: "error"
+                });
+                this.sendText = ''
+            }else{
+                let message = {
+                    sendId: this.$store.getters.uid,
+                    receptionId: this.receptionId,
+                    chatContents: this.sendText
+                };
+                createNewChatContents(message).then(()=>{
+                    this.$message({
+                        message: "消息发送成功",
+                        type: "success"
+                    });
+                    this.sendText = ''
+                    this.updateChatListHandle();
+                })
             }
         }
     }
@@ -87,6 +150,7 @@ export default {
         height: 620px;
         background-color: #fff;
         display: flex;
+        margin-top: -20px;
         #side{
             width: 200px;
             height: 100%;
@@ -127,6 +191,9 @@ export default {
                 }
             }
             #chat{
+                height: 500px;
+                overflow-y:scroll;
+                // background-color: pink;
                 padding: 10px 30px 0;
                 .chat-content{
                     margin-bottom: 10px;
@@ -155,6 +222,15 @@ export default {
                 .chat-right{
                     float: right;
 
+                }
+            }
+            #send-text{
+                height: 50px;
+                // background-color: pink;
+                display: flex;
+                .btn{
+                    height: 40px;
+                    margin: 10px 5px ;
                 }
             }
         }
