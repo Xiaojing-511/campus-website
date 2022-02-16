@@ -42,9 +42,24 @@ export const getChatList = (params) => {
         data: params
     })
 }
+
+export const addFriend = (params) => {
+    return request({
+        url: '/api/addFriend',
+        method: 'post',
+        data: params
+    })
+}
 export const getUserFriends = (params) => {
     return request({
         url: '/api/queryFriends',
+        method: 'post',
+        data: params
+    })
+}
+export const judgeUserIsFriend = (params) => {
+    return request({
+        url: '/api/judgeIsFriend',
         method: 'post',
         data: params
     })

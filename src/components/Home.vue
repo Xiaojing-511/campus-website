@@ -16,7 +16,24 @@
     <main>
         <section>
             <article v-for="(item) in articles" :key="item.id">
-                <span class="status-info">{{item.uid}}</span>
+                 <el-dialog
+                    title="个人信息"
+                    :visible.sync="dialogVisible"
+                    width="40%">
+                    <div style="width:100%;position:relative;margin-top:-30px">
+                        <div v-show="uid!==info.uid">
+                            <el-button v-show="!isFriend" @click="addFriend" class="add-btn" type="primary" round>加好友</el-button>
+                            <el-button v-show="isFriend" class="add-btn" type="success" round>已为好友</el-button>
+                        </div>
+                        <div class="user-info">
+                            <span>用户名: {{info.uid}}</span>
+                        </div>
+                    </div>
+                </el-dialog>
+                <span @click="showInfo(item)">
+                    <el-avatar class="el-dropdown-link status-avatar" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+                </span>
+                <span class="status-info" >{{item.uid}}</span>
                 <span class="status-info">{{item.createTime}}</span>
                 <p>{{item.contents}}</p>
             </article>
@@ -26,33 +43,26 @@
 </template>
 <script>
 import { judgeEmptyStr } from '@/api/common';
-import { createUserStatus,getAllUserStatus } from '@/api/communication'
+import { createUserStatus,getAllUserStatus,addFriend,judgeUserIsFriend } from '@/api/communication'
 export default {
     data() {
         return {
+            uid: window.localStorage.getItem('uid'),
             articles: [],
             newText: '',
-            isWriting: false
+            isWriting: false,
+            dialogVisible: false,
+            info:{},
+            isFriend: false
         }
     },
     created(){
-        // this.articles = [
-        //     {
-        //         id: 2,
-        //         contents: "1 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderi"
-        //     },
-        //     {
-        //         id: 1,
-        //         contents: "2 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderi"
-        //     },
-        // ];
         this.getStatus();
     },
     methods:{
         getStatus(){
             getAllUserStatus().then(res=>{
                 this.articles = res.data;
-                console.log( this.articles[0].createTime);
             })
         },
         addState(){
@@ -61,14 +71,10 @@ export default {
                     uid: window.localStorage.getItem('uid'),
                     sid: ''+Math.random()*Math.random(),
                     contents: this.newText,
-                    // createTime: Date.now()
                 };
-                console.log('新动态',obj);
                 createUserStatus(obj).then(res=>{
-                    console.log(res);
+                    console.log('res',res);
                     this.isWriting = !this.isWriting
-                    console.log('newstate', this.newText);
-
                     this.$message({
                         message: "动态发送成功",
                         type: "success"
@@ -87,6 +93,28 @@ export default {
                 this.newText = '';
             }
         },
+        showInfo(info){
+            this.dialogVisible = true;
+            this.info.uid = info.uid;
+            // 判断是否互为好友
+            judgeUserIsFriend({
+                uid: this.uid,
+                ufriendId: this.info.uid
+            }).then(res=>{
+                console.log('res',res);
+                this.isFriend = res.data.isFriend
+            })
+        },
+        addFriend(){
+            addFriend({
+                uid: this.uid,
+                ufriendId: this.info.uid
+            }).then(res=>{
+                console.log('res',res);
+                this.$message.success('添加好友成功，快去聊天吧～');
+                this.isFriend = true;
+            })
+        }
 
     }
 }
@@ -119,14 +147,25 @@ main{
             margin-bottom: 20px;
             font-size: 19px;
             line-height: 1.6em;
+            padding: 10px;
+            .add-btn{
+                position: absolute;
+                right: 0;
+            }
+            .user-info{
+            }
+            .status-avatar{
+                cursor: pointer;
+            }
             .status-info{
                 font-size: 12px;
                 height: 20px;
                 line-height: 20px;
-                background-color: rgb(255, 192, 213);
+                background-color: #eee;
                 border-radius: 5px;
-                margin: 5px 10px 0 10px;
+                margin: 0px 10px;
                 padding: 5px;
+                vertical-align: text-top;
             }
             p{
                 padding: 10px;

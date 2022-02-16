@@ -5,6 +5,7 @@
                 <li v-for="item in chatUserList" :key="item.ufriendId" class="list-item">{{item.ufriendId}}</li>
             </ul>
         </div>
+        
         <div id="content">
             <div id="user-info">
                 <p class="user-name">{{receptionId}}</p>
@@ -39,29 +40,29 @@ export default {
         return {
             receptionId: '',
             chatUserList: [
-                {
-                    id: '20185855'
-                },
-                {
-                    id: 'xiaozhang'
-                },
-                {
-                    id: 'xiaoli'
-                },
+                // {
+                //     id: '20185855'
+                // },
+                // {
+                //     id: 'xiaozhang'
+                // },
+                // {
+                //     id: 'xiaoli'
+                // },
             ],
             chatContentsList: [
-                {
-                    cid: '153135',
-                    sendid: '20185855',
-                    contents: '能够看见不',
-                    sendTime: '13:24'
-                },
-                {
-                    cid: '153125',
-                    sendid: '139',
-                    contents: '能',
-                    sendTime: '13:25'
-                },
+                // {
+                //     cid: '153135',
+                //     sendid: '20185855',
+                //     contents: '能够看见不',
+                //     sendTime: '13:24'
+                // },
+                // {
+                //     cid: '153125',
+                //     sendid: '139',
+                //     contents: '能',
+                //     sendTime: '13:25'
+                // },
             ],
             sendText:'',
         }
@@ -72,20 +73,23 @@ export default {
     },
     async mounted(){
         await getUserFriends({uid: this.$store.getters.uid}).then(res=>{
-                console.log('friends', res);
                 this.chatUserList = res.data;
-                this.receptionId = this.chatUserList[0].ufriendId;
         });
-        const oLis = this.$refs.chatList.getElementsByTagName('li');
-        oLis[0].classList.add('active');
-        await getChatList({
-                sendId: this.$store.getters.uid,
-                receptionId: this.receptionId
-            }).then(res=>{
-                console.log('chat contents', res.data);
-                this.chatContentsList = res.data
-            });
-        this.addLiClick();
+        if(this.chatUserList.length){
+            this.receptionId = this.chatUserList[0].ufriendId;
+            const oLis = this.$refs.chatList.getElementsByTagName('li');
+            console.log(' oLis[0]', oLis);
+            oLis[0].classList.add('active');
+            await getChatList({
+                    sendId: this.$store.getters.uid,
+                    receptionId: this.receptionId
+                }).then(res=>{
+                    console.log('chat contents', res.data);
+                    this.chatContentsList = res.data
+                });
+            this.addLiClick();
+
+        }
     },
     methods:{
         async addLiClick(){

@@ -18,6 +18,8 @@ import {
     Dropdown,
     DropdownItem,
     DropdownMenu,
+    Tooltip,
+    Dialog
 } from 'element-ui';
 Vue.use(Form);
 Vue.use(FormItem);
@@ -35,5 +37,7 @@ Vue.use(Avatar);
 Vue.use(Dropdown);
 Vue.use(DropdownItem);
 Vue.use(DropdownMenu);
+Vue.use(Tooltip);
+Vue.use(Dialog);
 Vue.prototype.$message = Message;
 

@@ -5,10 +5,10 @@
         <nav id="nav-header">
             <ul ref="navUl"> 
                 <li class="menu-item active">
-                    <router-link to="/main/home">Home</router-link>
+                    <router-link to="/main/home">动态</router-link>
                 </li>
                 <li class="menu-item">
-                    <router-link to="/main/chat">Chat</router-link> 
+                    <router-link to="/main/chat">聊天</router-link> 
                 </li>
                 <li class="menu-item">
                     <router-link to="/main/others">Others</router-link> 
