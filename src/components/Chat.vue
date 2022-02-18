@@ -35,63 +35,60 @@
 </template>
 <script>
 import {createNewChatContents,getChatList,getUserFriends} from '../api/communication';
+import { initWebsocket } from '../api/common';
 export default {
     data() {
         return {
+            sendId: '',
             receptionId: '',
-            chatUserList: [
-                // {
-                //     id: '20185855'
-                // },
-                // {
-                //     id: 'xiaozhang'
-                // },
-                // {
-                //     id: 'xiaoli'
-                // },
-            ],
-            chatContentsList: [
-                // {
-                //     cid: '153135',
-                //     sendid: '20185855',
-                //     contents: '能够看见不',
-                //     sendTime: '13:24'
-                // },
-                // {
-                //     cid: '153125',
-                //     sendid: '139',
-                //     contents: '能',
-                //     sendTime: '13:25'
-                // },
-            ],
-            sendText:'',
+            chatUserList: [],
+            chatContentsList: [],
+            sendText: '',
         }
     },
     created(){
-        this.$store.dispatch('setUid', window.localStorage.getItem('uid'))
-        
+        this.$store.dispatch('setUid', window.localStorage.getItem('uid'));   
     },
     async mounted(){
-        await getUserFriends({uid: this.$store.getters.uid}).then(res=>{
+        this.sendId = this.$store.getters.uid;
+        this.initWebsocket();     
+        await getUserFriends({uid: this.sendId}).then(res=>{
                 this.chatUserList = res.data;
         });
         if(this.chatUserList.length){
             this.receptionId = this.chatUserList[0].ufriendId;
             const oLis = this.$refs.chatList.getElementsByTagName('li');
-            console.log(' oLis[0]', oLis);
             oLis[0].classList.add('active');
             await getChatList({
-                    sendId: this.$store.getters.uid,
+                    sendId: this.sendId,
                     receptionId: this.receptionId
                 }).then(res=>{
-                    console.log('chat contents', res.data);
                     this.chatContentsList = res.data
                 });
             this.addLiClick();
-
         }
     },
+    beforeDestroy(){
+        this.ws.close();
+    },
     methods:{
+        initWebsocket(){
+            let _this = this;
+            initWebsocket(_this);
+            this.ws.onmessage = function (event) {
+                let {sendId,receptionId} = JSON.parse(event.data);
+                if(_this.sendId == receptionId && _this.receptionId == sendId){
+                    _this.updateChatListHandle();
+                }else if(_this.sendId == receptionId && _this.receptionId !== sendId){
+                    const oLis = _this.$refs.chatList.getElementsByTagName('li');
+                    for (let i = 0; i < oLis.length; i++) {
+                        if(oLis[i].innerHTML == sendId){
+                            oLis[i].classList.add('new-message')
+                        }
+                    }
+                }
+            }
+        },
         async addLiClick(){
             const oLis = this.$refs.chatList.getElementsByTagName('li');
             for (let i = 0; i < oLis.length; i++) {
@@ -102,6 +99,7 @@ export default {
                         }
                     }
                     oLis[i].classList.add('active');
+                    oLis[i].classList.remove('new-message');
                     this.receptionId = oLis[i].innerHTML;
                     this.updateChatListHandle();
                 }
@@ -109,20 +107,21 @@ export default {
             console.log('click');
         },
         getUserFriends(){
-            getUserFriends({uid: this.$store.getters.uid}).then(res=>{
+            getUserFriends({uid: this.sendId}).then(res=>{
                 this.chatUserList = res.data;
                 this.receptionId = this.chatUserList[0].ufriendId;
             })
         },
         updateChatListHandle(){
             getChatList({
-                sendId: this.$store.getters.uid,
+                sendId: this.sendId,
                 receptionId: this.receptionId
             }).then(res=>{
                 this.chatContentsList = res.data
             })
         },
         sendMessage(){
+            let _this = this;
             if(this.sendText.length === 0){
                 this.$message({
                     message: "发空的消息是没意思的哦~",
@@ -131,7 +130,7 @@ export default {
                 this.sendText = ''
             }else{
                 let message = {
-                    sendId: this.$store.getters.uid,
+                    sendId: this.sendId,
                     receptionId: this.receptionId,
                     chatContents: this.sendText
                 };
@@ -142,6 +141,7 @@ export default {
                     });
                     this.sendText = ''
                     this.updateChatListHandle();
+                    _this.ws.send(JSON.stringify({type: 'chat',...message}));
                 })
             }
         }
@@ -171,8 +171,20 @@ export default {
                     cursor: pointer;
                     &:hover{
                         background-color: #ddd;
+                    } 
+                }
+                .new-message{
+                    position: relative;
+                    &::after{
+                        content: '';
+                        width: 15px;
+                        height: 15px;
+                        border-radius: 50%;
+                        background-color: rgb(219, 58, 9);
+                        position: absolute;
+                        right: 10px;
+                        top: 10px;
                     }
-                    
                 }
                 .active{
                     background-color: #ccc;
