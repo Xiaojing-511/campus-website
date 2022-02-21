@@ -13,32 +13,28 @@
         </el-input>
         <el-button v-show="isWriting" class="btn" size="mini" type="primary" round @click="addState">发一条</el-button>
     </div>
-    <main>
-        <section>
-            <article v-for="(item) in articles" :key="item.id">
-                 <el-dialog
-                    title="个人信息"
-                    :visible.sync="dialogVisible"
-                    width="40%">
-                    <div style="width:100%;position:relative;margin-top:-30px">
-                        <div v-show="uid!==info.uid">
-                            <el-button v-show="!isFriend" @click="addFriend" class="add-btn" type="primary" round>加好友</el-button>
-                            <el-button v-show="isFriend" class="add-btn" type="success" round>已为好友</el-button>
-                        </div>
-                        <div class="user-info">
-                            <span>用户名: {{info.uid}}</span>
-                        </div>
-                    </div>
-                </el-dialog>
-                <span @click="showInfo(item)">
-                    <el-avatar class="el-dropdown-link status-avatar" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
-                </span>
-                <span class="status-info" >{{item.uid}}</span>
-                <span class="status-info">{{item.createTime}}</span>
-                <p>{{item.contents}}</p>
-            </article>
-        </section>
-    </main>
+    <article v-for="(item) in articles" :key="item.id">
+        <el-dialog
+            title="个人信息"
+            :visible.sync="dialogVisible"
+            width="40%">
+            <div style="width:100%;position:relative;margin-top:-30px">
+                <div v-show="uid!==info.uid">
+                    <el-button v-show="!isFriend" @click="addFriend" class="add-btn" type="primary" round>加好友</el-button>
+                    <el-button v-show="isFriend" class="add-btn" type="success" round>已为好友</el-button>
+                </div>
+                <div class="user-info">
+                    <span>用户名: {{info.uid}}</span>
+                </div>
+            </div>
+        </el-dialog>
+        <span @click="showInfo(item)">
+            <el-avatar class="el-dropdown-link status-avatar" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+        </span>
+        <span class="status-info" >{{item.uid}}</span>
+        <span class="status-info">{{item.createTime}}</span>
+        <p>{{item.contents}}</p>
+    </article>
 </div>
 </template>
 <script>
@@ -69,7 +65,7 @@ export default {
             if(!judgeEmptyStr(this.newText)){
                 let obj = {
                     uid: window.localStorage.getItem('uid'),
-                    sid: ''+Math.random()*Math.random(),
+                    // sid: ''+Math.random()*Math.random(),
                     contents: this.newText,
                 };
                 createUserStatus(obj).then(res=>{
@@ -137,40 +133,36 @@ export default {
         right: 5px;
     }
 }
-main{
-    section{
-        article {
-            width: 100%;
-            background: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 19px;
-            line-height: 1.6em;
-            padding: 10px;
-            .add-btn{
-                position: absolute;
-                right: 0;
-            }
-            .user-info{
-            }
-            .status-avatar{
-                cursor: pointer;
-            }
-            .status-info{
-                font-size: 12px;
-                height: 20px;
-                line-height: 20px;
-                background-color: #eee;
-                border-radius: 5px;
-                margin: 0px 10px;
-                padding: 5px;
-                vertical-align: text-top;
-            }
-            p{
-                padding: 10px;
-            }
-        }
+article {
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 19px;
+    line-height: 1.6em;
+    padding: 10px;
+    .add-btn{
+        position: absolute;
+        right: 0;
+    }
+    .user-info{
+    }
+    .status-avatar{
+        cursor: pointer;
+    }
+    .status-info{
+        font-size: 12px;
+        height: 20px;
+        line-height: 20px;
+        background-color: #eee;
+        border-radius: 5px;
+        margin: 0px 10px;
+        padding: 5px;
+        vertical-align: text-top;
+    }
+    p{
+        padding: 10px;
     }
 }
 </style>

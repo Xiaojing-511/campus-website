@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../components/Home.vue';
 import Chat from '../components/Chat.vue';
 import Others from '../components/Others.vue';
+import Info from '../components/Info.vue';
 
 Vue.use(VueRouter)
 
@@ -36,6 +37,11 @@ const routes = [
         path: 'others',
         name: 'Others',
         component: Others
+      },
+      {
+        path: 'info',
+        name: 'Info',
+        component: Info
       },
     ]
   },

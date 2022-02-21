@@ -1,7 +1,7 @@
 <template>
     <div id="container">
         <el-dropdown id="u-avatar" @command="logout">
-            <el-avatar class="el-dropdown-link" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+            <el-avatar class="el-dropdown-link" :src="uImgSrc"></el-avatar>
             <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="user" disabled >{{uid}}</el-dropdown-item>
                 <el-dropdown-item command="out" divided>退出登陆</el-dropdown-item>
@@ -17,14 +17,27 @@
 </template>
 <script>
 import Nav from '../components/Nav'
+import {getUserInfo} from '../api/communication'
 export default {
     data() {
         return {
-            uid: window.localStorage.getItem('uid')
+            uid: window.localStorage.getItem('uid'),
+        }
+    },
+    computed:{
+        uImgSrc(){
+            return this.$store.getters.uImgSrc
         }
     },
     components:{
         Nav
+    },
+    created(){
+        getUserInfo({uid: this.uid}).then(res=>{
+            console.log('info',res.data.info);
+            this.$store.dispatch('setUImgSrc',res.data.info.uImageSrc);
+            this.$store.dispatch('setUStyleText',res.data.info.styleText);
+        })
     },
     methods:{
         logout(item){

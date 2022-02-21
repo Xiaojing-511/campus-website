@@ -14,6 +14,21 @@ export const createAccount = (params) => {
         data: params
     })
 }
+export const getUserInfo = (params) => {
+    return request({
+        url: '/api/getUserInfo',
+        method: 'post',
+        data: params
+    })
+}
+
+export const updateAccountInfo = (params) => {
+    return request({
+        url: '/api/updateAccountInfo',
+        method: 'post',
+        data: params
+    })
+}
 export const createUserStatus = (params) => {
     return request({
         url: '/api/createUserStatus',
@@ -60,6 +75,13 @@ export const getUserFriends = (params) => {
 export const judgeUserIsFriend = (params) => {
     return request({
         url: '/api/judgeIsFriend',
+        method: 'post',
+        data: params
+    })
+}
+export const createUserCommodityStatus = (params) => {
+    return request({
+        url: '/api/createUserCommodityStatus',
         method: 'post',
         data: params
     })

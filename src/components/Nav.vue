@@ -1,7 +1,7 @@
 <template>
     <header>
         <!-- <img src="../images/indite-logo.png" alt="" width="150px"> -->
-        <p>I can do everything!</p>
+        <p>{{userStyleText}}</p>
         <nav id="nav-header">
             <ul ref="navUl"> 
                 <li class="menu-item active">
@@ -11,7 +11,10 @@
                     <router-link to="/main/chat">聊天</router-link> 
                 </li>
                 <li class="menu-item">
-                    <router-link to="/main/others">Others</router-link> 
+                    <router-link to="/main/others">跳蚤市场</router-link> 
+                </li>
+                <li class="menu-item">
+                    <router-link to="/main/info">个人信息</router-link> 
                 </li>
             </ul>
         </nav>
@@ -22,6 +25,11 @@ export default {
     data(){
         return{
 
+        }
+    },
+    computed:{
+        userStyleText(){
+            return this.$store.getters.uStyleText;
         }
     },
     methods:{
@@ -37,10 +45,26 @@ export default {
                     oLis[i].classList.add('active');
                 }
             }
+        },
+        judgeLiClick(name){
+            const oLis = this.$refs.navUl.getElementsByTagName('li');
+            for (let j = 0; j < oLis.length; j++) {
+                if(oLis[j].classList.value.includes('active')){
+                    oLis[j].classList.remove('active')
+                }
+            }
+            switch(name){
+                case 'Home': oLis[0].classList.add('active');break;
+                case 'Chat': oLis[1].classList.add('active');break;
+                case 'Others': oLis[2].classList.add('active');break;
+                case 'Info': oLis[3].classList.add('active');break;
+                default: break;
+            }
         }
     },
     mounted(){
         this.addLiClick();
+        this.judgeLiClick(this.$route.name);
     }
 }
 </script>
