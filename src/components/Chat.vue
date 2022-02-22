@@ -13,9 +13,9 @@
             <div id="chat">
                 <ul>
                     <li v-for="item in chatContentsList" :key="item.cid" :class="[ item.sendId === $store.getters.uid ? 'chat-right' : 'chat-left' ,'chat-content']">
-                        <img class="user-img img-left" v-if="item.sendId !== $store.getters.uid" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="111">
+                        <img class="user-img img-left" v-if="item.sendId !== $store.getters.uid" :src="item.uImageSrc" alt="111">
                         <span>{{item.chatContents}}</span>
-                        <img class="user-img img-right" v-if="item.sendId === $store.getters.uid" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="111">
+                        <img class="user-img img-right" v-if="item.sendId === $store.getters.uid" :src="item.uImageSrc" alt="111">
                     </li>
                 </ul>
             </div>
@@ -53,7 +53,7 @@ export default {
         this.sendId = this.$store.getters.uid;
         this.initWebsocket();     
         await getUserFriends({uid: this.sendId}).then(res=>{
-                this.chatUserList = res.data;
+            this.chatUserList = res.data;
         });
         if(this.chatUserList.length){
             this.receptionId = this.chatUserList[0].ufriendId;
@@ -118,6 +118,7 @@ export default {
                 receptionId: this.receptionId
             }).then(res=>{
                 this.chatContentsList = res.data
+                console.log('chatcontent...', this.chatContentsList);
             })
         },
         sendMessage(){

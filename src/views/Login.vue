@@ -48,7 +48,7 @@ export default {
         createAccount({
           uid: this.userid,
           upwd: this.userpwd,
-          styleText: '无个签...',
+          styleText: '我的座右铭...',
           uImageSrc: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
         }).then(res => {
           if (res.status === 200) {

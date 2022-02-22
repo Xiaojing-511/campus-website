@@ -21,7 +21,13 @@ export const getUserInfo = (params) => {
         data: params
     })
 }
-
+export const updateAccountImg = (params) => {
+    return request({
+        url: '/api/updateAccountImg',
+        method: 'post',
+        data: params
+    })
+}
 export const updateAccountInfo = (params) => {
     return request({
         url: '/api/updateAccountInfo',

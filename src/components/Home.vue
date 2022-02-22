@@ -21,15 +21,17 @@
             <div style="width:100%;position:relative;margin-top:-30px">
                 <div v-show="uid!==info.uid">
                     <el-button v-show="!isFriend" @click="addFriend" class="add-btn" type="primary" round>加好友</el-button>
-                    <el-button v-show="isFriend" class="add-btn" type="success" round>已为好友</el-button>
+                    <el-button v-show="isFriend" disabled class="add-btn" type="success" round>已为好友</el-button>
                 </div>
-                <div class="user-info">
+                <p>用户名: {{info.uid}}</p>
+                <p>座右铭: {{info.styleText}}</p>
+                <!-- <div class="user-info">
                     <span>用户名: {{info.uid}}</span>
-                </div>
+                </div> -->
             </div>
         </el-dialog>
         <span @click="showInfo(item)">
-            <el-avatar class="el-dropdown-link status-avatar" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+            <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
         </span>
         <span class="status-info" >{{item.uid}}</span>
         <span class="status-info">{{item.createTime}}</span>
@@ -39,7 +41,7 @@
 </template>
 <script>
 import { judgeEmptyStr } from '@/api/common';
-import { createUserStatus,getAllUserStatus,addFriend,judgeUserIsFriend } from '@/api/communication'
+import { createUserStatus,getAllUserStatus,addFriend,judgeUserIsFriend,getUserInfo } from '@/api/communication'
 export default {
     data() {
         return {
@@ -65,18 +67,18 @@ export default {
             if(!judgeEmptyStr(this.newText)){
                 let obj = {
                     uid: window.localStorage.getItem('uid'),
-                    // sid: ''+Math.random()*Math.random(),
                     contents: this.newText,
                 };
                 createUserStatus(obj).then(res=>{
-                    console.log('res',res);
-                    this.isWriting = !this.isWriting
-                    this.$message({
-                        message: "动态发送成功",
-                        type: "success"
-                    });
-                    this.newText = '';
-                    this.getStatus();
+                    if(res.status == 200){
+                        this.isWriting = !this.isWriting
+                        this.$message({
+                            message: "动态发送成功",
+                            type: "success"
+                        });
+                        this.newText = '';
+                        this.getStatus();
+                    }
                     
                 }).catch(err=>{
                     console.log(err);
@@ -89,26 +91,32 @@ export default {
                 this.newText = '';
             }
         },
-        showInfo(info){
-            this.dialogVisible = true;
-            this.info.uid = info.uid;
+        async showInfo(item){
+            this.info.uid = item.uid;
             // 判断是否互为好友
-            judgeUserIsFriend({
+            await judgeUserIsFriend({
                 uid: this.uid,
                 ufriendId: this.info.uid
             }).then(res=>{
-                console.log('res',res);
+                console.log('friend.....',res.data.isFriend);
                 this.isFriend = res.data.isFriend
             })
+            await getUserInfo({uid: item.uid}).then(res=>{
+                this.info.uid = res.data.info.uid;
+                this.info.styleText = res.data.info.styleText;
+            })
+            this.dialogVisible = true;
         },
         addFriend(){
+            console.log(this.uid,this.info.uid);
             addFriend({
                 uid: this.uid,
                 ufriendId: this.info.uid
             }).then(res=>{
-                console.log('res',res);
-                this.$message.success('添加好友成功，快去聊天吧～');
-                this.isFriend = true;
+                if(res.status == 200){
+                    this.$message.success('添加好友成功，快去聊天吧～');
+                    this.isFriend = true;
+                }
             })
         }
 
