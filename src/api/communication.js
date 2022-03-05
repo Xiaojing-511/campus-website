@@ -63,7 +63,6 @@ export const getChatList = (params) => {
         data: params
     })
 }
-
 export const addFriend = (params) => {
     return request({
         url: '/api/addFriend',
@@ -88,6 +87,27 @@ export const judgeUserIsFriend = (params) => {
 export const createUserCommodityStatus = (params) => {
     return request({
         url: '/api/createUserCommodityStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const addCommodityPhoto = (params) => {
+    return request({
+        url: '/api/addCommodityPhoto',
+        method: 'post',
+        data: params
+    })
+}
+export const addUserCommodityStatusImg = (params) => {
+    return request({
+        url: '/api/addUserCommodityStatusImg',
+        method: 'post',
+        data: params
+    })
+}
+export const getUserCommodityStatus = (params) => {
+    return request({
+        url: '/api/getUserCommodityStatus',
         method: 'post',
         data: params
     })

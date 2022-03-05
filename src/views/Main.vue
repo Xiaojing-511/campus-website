@@ -19,6 +19,7 @@
 import Nav from '../components/Nav'
 import {getUserInfo} from '../api/communication'
 export default {
+    name: 'Main',
     data() {
         return {
             uid: window.localStorage.getItem('uid'),
@@ -73,12 +74,15 @@ export default {
         
         #nav{
             width: 320px;
+            height: 1090px;
             padding: 20px 50px;
         }
         #main{
             flex: 1;
             padding: 40px;
             min-height: 1000px;
+            height: 1000px;
+            overflow: scroll;
             border-top: 10px solid #eee;
         }
     }

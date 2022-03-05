@@ -11,7 +11,7 @@
                     <router-link to="/main/chat">聊天</router-link> 
                 </li>
                 <li class="menu-item">
-                    <router-link to="/main/others">跳蚤市场</router-link> 
+                    <router-link to="/main/commodity">跳蚤市场</router-link> 
                 </li>
                 <li class="menu-item">
                     <router-link to="/main/info">个人信息</router-link> 
@@ -56,7 +56,7 @@ export default {
             switch(name){
                 case 'Home': oLis[0].classList.add('active');break;
                 case 'Chat': oLis[1].classList.add('active');break;
-                case 'Others': oLis[2].classList.add('active');break;
+                case 'Commodity': oLis[2].classList.add('active');break;
                 case 'Info': oLis[3].classList.add('active');break;
                 default: break;
             }

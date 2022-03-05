@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../components/Home.vue';
 import Chat from '../components/Chat.vue';
-import Others from '../components/Others.vue';
+import Commodity from '../components/Commodity.vue';
 import Info from '../components/Info.vue';
 
 Vue.use(VueRouter)
@@ -34,9 +34,9 @@ const routes = [
         component: Chat
       },
       {
-        path: 'others',
-        name: 'Others',
-        component: Others
+        path: 'commodity',
+        name: 'Commodity',
+        component: Commodity
       },
       {
         path: 'info',

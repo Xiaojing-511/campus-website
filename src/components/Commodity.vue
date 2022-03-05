@@ -16,27 +16,33 @@
             >
             </el-input>
             <el-upload
-                action="http://localhost:3000/add"
+                action="http://localhost:3000/addCommodityPhoto"
                 list-type="picture-card"
                 ref="upload"
+                name="filecommodity"
+                accept="jpg, png, jpeg"
+                :on-change="handleChange"
                 :on-success="handleAvatarSuccess"
+                :limit="6"
                 multiple
+                :file-list="fileList"
                 :auto-upload="false">
-                <i slot="default" class="el-icon-plus"></i>
-                <div slot="file" slot-scope="{file}">
-                <img
-                    class="el-upload-list__item-thumbnail"
-                    :src="file.url" alt=""
-                >
-                <span class="el-upload-list__item-actions">
-                    <span
-                        class="el-upload-list__item-delete"
-                        @click="handleRemove(file)"
-                    >
-                    <i class="el-icon-delete"></i>
-                    </span>
-                </span>
-                </div>
+                    <i slot="default" class="el-icon-plus"></i>
+                    <div slot="file" slot-scope="{file}">
+                        <img
+                            name="file"
+                            class="el-upload-list__item-thumbnail"
+                            :src="file.url" alt=""
+                        >
+                        <span class="el-upload-list__item-actions">
+                            <span
+                                class="el-upload-list__item-delete"
+                                @click="handleRemove(file)"
+                            >
+                            <i class="el-icon-delete"></i>
+                            </span>
+                        </span>
+                    </div>
             </el-upload>
             <el-button type="primary" @click="submitForm()">立即发布</el-button>
         </div>
@@ -46,51 +52,87 @@
     <div class="container">
         <el-button class="new-btn" size="mini" type="primary" round @click="showDialog()">我要发布</el-button>
     </div>
-    <article>
-        <!-- <img src="http://localhost:3000/upload/1645433748197picture3.jpg" alt=""> -->
-        <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-            dolor in reprehenderi
-        </p>
+    <article v-for="(item) in commodityList" :key="item.cid">
+        <span>
+            <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
+        </span>
+        <span class="status-info" >{{item.uid}}</span>
+        <span class="status-info">{{item.createTime}}</span>
+        <p>{{item.contents}}</p>
+        <img class="commodity-img" v-for="(itemImg,index) in item.image" :key="index" :src="itemImg" alt=""/>
     </article>
 </div>
 </template>
 <script>
-import {createUserCommodityStatus} from '../api/communication'
+import {
+    createUserCommodityStatus,
+addUserCommodityStatusImg,
+// addCommodityPhoto,
+getUserCommodityStatus} from '../api/communication'
 export default {
     data(){
         return {
             uid: '',
             dialogVisible: false,
             publishContent: '',
+            cid: '',
+            commodityList: [],
+            fileList: [],
+            commodityImageArr:[],
             // dialogImageUrl:'',
             // imgDialogVisible: false,
         }
     },
+    created(){
+        this.updateCommodityList();
+    },
     mounted(){
         this.uid = window.localStorage.getItem('uid');
-        console.log(this.uid);
     },
     methods: {
+        updateCommodityList(){
+            getUserCommodityStatus().then(res=>{
+                this.commodityList = res.data;
+            })
+        },
         handleRemove(file) {
-            console.log(file);
+            console.log(file,this.fileList);
         },
-        submitForm(){
-            this.$refs.upload.submit();
-            console.log('submit...');
+        // 文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
+        handleChange(file, fileList) {
+            this.fileList = fileList;
         },
-        handleAvatarSuccess(res, file){
-            console.log('upload',res,file);
+        async submitForm(){
             let commodityStatusInfo = {
                 uid: this.uid,
                 type: 'book',
                 contents: this.publishContent,
-                image: res.imgName
+                image: ''
             }
-            createUserCommodityStatus(commodityStatusInfo).then(resData=>{
-                console.log(resData);
+            await createUserCommodityStatus(commodityStatusInfo).then(resData=>{
+                this.cid = resData.data.cid;
+                this.$refs.upload.submit();
             })
+        },
+        handleAvatarSuccess(res){
+            this.commodityImageArr.push(res.imgName);
+            if(this.fileList.length == this.commodityImageArr.length){
+                 addUserCommodityStatusImg({
+                    cid: this.cid,
+                    imgName: this.commodityImageArr
+                }).then(res=>{
+                    if(res.status == 200){
+                        this.dialogVisible = false;
+                        this.cid = this.publishContent = '';
+                        this.$refs.upload.clearFiles();
+                        this.fileList = [];
+                        this.commodityImageArr = [];
+                        this.$message.success('发布成功！');
+                        this.updateCommodityList();
+                    }
+                }) 
+            }
+                      
         },
         // handlePictureCardPreview(file) {
         //     this.dialogImageUrl = file.url;
@@ -134,7 +176,7 @@ export default {
 <style lang="scss" scoped>
 .dialog{
     width: 100%;
-    height: 400px;
+    height: 500px;
     position: relative;
     margin-top: -10px;
 }
@@ -160,8 +202,27 @@ article {
     margin-bottom: 40px;
     font-size: 19px;
     line-height: 1.6em;
+    padding: 10px;
+
+    .status-avatar{
+        cursor: pointer;
+    }
+    .status-info{
+        font-size: 12px;
+        height: 20px;
+        line-height: 20px;
+        background-color: #eee;
+        border-radius: 5px;
+        margin: 0px 10px;
+        padding: 5px;
+        vertical-align: text-top;
+    }
     p{
         padding: 10px;
+    }
+    .commodity-img{
+        width: 200px;
+        margin: 10px;
     }
 }
 </style>

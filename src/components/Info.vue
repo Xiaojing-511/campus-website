@@ -4,7 +4,7 @@
             <div style="width:100px;height:120px;">
                 <el-avatar :size="70" :src="imgSrc" style="margin-left:5px"></el-avatar>
                 <el-upload
-                    action="http://localhost:3000/add"
+                    action="http://localhost:3000/addAvatar"
                     ref="upload"
                     :on-success="handleAvatarSuccess"
                     auto-upload

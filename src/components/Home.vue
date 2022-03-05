@@ -13,7 +13,7 @@
         </el-input>
         <el-button v-show="isWriting" class="btn" size="mini" type="primary" round @click="addState">发一条</el-button>
     </div>
-    <article v-for="(item) in articles" :key="item.id">
+    <article v-for="(item) in articles" :key="item.sid">
         <el-dialog
             title="个人信息"
             :visible.sync="dialogVisible"
@@ -57,10 +57,14 @@ export default {
     created(){
         this.getStatus();
     },
+    mounted(){
+        console.log('dom...',document.getElementById('new-state'));
+    },
     methods:{
         getStatus(){
             getAllUserStatus().then(res=>{
                 this.articles = res.data;
+                console.log(this.articles);
             })
         },
         addState(){

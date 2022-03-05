@@ -2,7 +2,7 @@
     <div id="container">
         <div id="side">
             <ul ref="chatList">
-                <li v-for="item in chatUserList" :key="item.ufriendId" class="list-item">{{item.ufriendId}}</li>
+                <li v-for="item in chatUserList" :key="item.ufid" class="list-item">{{item.ufriendId}}</li>
             </ul>
         </div>
         
@@ -54,6 +54,7 @@ export default {
         this.initWebsocket();     
         await getUserFriends({uid: this.sendId}).then(res=>{
             this.chatUserList = res.data;
+            console.log(this.chatUserList);
         });
         if(this.chatUserList.length){
             this.receptionId = this.chatUserList[0].ufriendId;
@@ -224,7 +225,10 @@ export default {
                     }
                     .user-img{
                         width: 40px;
+                        // height: 40px;
+                        overflow: hidden;
                         margin-bottom: -12px;
+                        border-radius: 50%;
                     }
                     .img-left{
                         margin-right: 10px;
