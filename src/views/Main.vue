@@ -35,7 +35,6 @@ export default {
     },
     created(){
         getUserInfo({uid: this.uid}).then(res=>{
-            console.log('info',res.data.info);
             this.$store.dispatch('setUImgSrc',res.data.info.uImageSrc);
             this.$store.dispatch('setUStyleText',res.data.info.styleText);
         })

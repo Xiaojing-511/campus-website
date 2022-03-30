@@ -49,6 +49,20 @@ export const getAllUserStatus = (params) => {
         data: params
     })
 }
+export const getUserStatus = (params) => {
+    return request({
+        url: '/api/getUserStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const deleteUserStatus = (params) => {
+    return request({
+        url: '/api/deleteUserStatus',
+        method: 'post',
+        data: params
+    })
+}
 export const createNewChatContents = (params) => {
     return request({
         url: '/api/createNewChatContents',
@@ -105,6 +119,13 @@ export const addUserCommodityStatusImg = (params) => {
         data: params
     })
 }
+export const getAllUserCommodityStatus = (params) => {
+    return request({
+        url: '/api/getAllUserCommodityStatus',
+        method: 'post',
+        data: params
+    })
+}
 export const getUserCommodityStatus = (params) => {
     return request({
         url: '/api/getUserCommodityStatus',
@@ -112,4 +133,33 @@ export const getUserCommodityStatus = (params) => {
         data: params
     })
 }
+export const deleteUserCommodityStatus = (params) => {
+    return request({
+        url: '/api/deleteUserCommodityStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const getCommodityTagTypes = (params) => {
+    return request({
+        url: '/api/getCommodityTagTypes',
+        method: 'post',
+        data: params
+    })
+}
+export const addCommodityComment = (params) => {
+    return request({
+        url: '/api/addCommodityComment',
+        method: 'post',
+        data: params
+    })
+}
+export const getCommodityComment = (params) => {
+    return request({
+        url: '/api/getCommodityComment',
+        method: 'post',
+        data: params
+    })
+}
+
 

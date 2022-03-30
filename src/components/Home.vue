@@ -14,35 +14,16 @@
         <el-button v-show="isWriting" class="btn" size="mini" type="primary" round @click="addState">发一条</el-button>
     </div>
     <article v-for="(item) in articles" :key="item.sid">
-        <el-dialog
-            title="个人信息"
-            :visible.sync="dialogVisible"
-            width="40%">
-            <div style="width:100%;position:relative;margin-top:-30px">
-                <div v-show="uid!==info.uid">
-                    <el-button v-show="!isFriend" @click="addFriend" class="add-btn" type="primary" round>加好友</el-button>
-                    <el-button v-show="isFriend" disabled class="add-btn" type="success" round>已为好友</el-button>
-                </div>
-                <p>用户名: {{info.uid}}</p>
-                <p>座右铭: {{info.styleText}}</p>
-                <!-- <div class="user-info">
-                    <span>用户名: {{info.uid}}</span>
-                </div> -->
-            </div>
-        </el-dialog>
-        <span @click="showInfo(item)">
-            <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
-        </span>
-        <span class="status-info" >{{item.uid}}</span>
-        <span class="status-info">{{item.createTime}}</span>
-        <p>{{item.contents}}</p>
+        <status-card :item = "item"></status-card>
     </article>
 </div>
 </template>
 <script>
 import { judgeEmptyStr } from '@/api/common';
-import { createUserStatus,getAllUserStatus,addFriend,judgeUserIsFriend,getUserInfo } from '@/api/communication'
+import StatusCard from './StatusCard.vue';
+import { createUserStatus,getAllUserStatus, } from '@/api/communication'
 export default {
+    components:{StatusCard},
     data() {
         return {
             uid: window.localStorage.getItem('uid'),
@@ -50,27 +31,23 @@ export default {
             newText: '',
             isWriting: false,
             dialogVisible: false,
-            info:{},
-            isFriend: false
         }
     },
     created(){
         this.getStatus();
     },
     mounted(){
-        console.log('dom...',document.getElementById('new-state'));
     },
     methods:{
         getStatus(){
             getAllUserStatus().then(res=>{
                 this.articles = res.data;
-                console.log(this.articles);
             })
         },
         addState(){
             if(!judgeEmptyStr(this.newText)){
                 let obj = {
-                    uid: window.localStorage.getItem('uid'),
+                    uid: this.uid,
                     contents: this.newText,
                 };
                 createUserStatus(obj).then(res=>{
@@ -94,36 +71,7 @@ export default {
                 });
                 this.newText = '';
             }
-        },
-        async showInfo(item){
-            this.info.uid = item.uid;
-            // 判断是否互为好友
-            await judgeUserIsFriend({
-                uid: this.uid,
-                ufriendId: this.info.uid
-            }).then(res=>{
-                console.log('friend.....',res.data.isFriend);
-                this.isFriend = res.data.isFriend
-            })
-            await getUserInfo({uid: item.uid}).then(res=>{
-                this.info.uid = res.data.info.uid;
-                this.info.styleText = res.data.info.styleText;
-            })
-            this.dialogVisible = true;
-        },
-        addFriend(){
-            console.log(this.uid,this.info.uid);
-            addFriend({
-                uid: this.uid,
-                ufriendId: this.info.uid
-            }).then(res=>{
-                if(res.status == 200){
-                    this.$message.success('添加好友成功，快去聊天吧～');
-                    this.isFriend = true;
-                }
-            })
         }
-
     }
 }
 </script>
@@ -154,27 +102,6 @@ article {
     font-size: 19px;
     line-height: 1.6em;
     padding: 10px;
-    .add-btn{
-        position: absolute;
-        right: 0;
-    }
-    .user-info{
-    }
-    .status-avatar{
-        cursor: pointer;
-    }
-    .status-info{
-        font-size: 12px;
-        height: 20px;
-        line-height: 20px;
-        background-color: #eee;
-        border-radius: 5px;
-        margin: 0px 10px;
-        padding: 5px;
-        vertical-align: text-top;
-    }
-    p{
-        padding: 10px;
-    }
+    
 }
 </style>

@@ -14,9 +14,14 @@
                 </el-upload>
             </div>
             <strong class="info-id">{{uid}}</strong>
-            <el-button @click="editInfo" class="info-btn" size="small" round>编辑资料</el-button>
+            <el-button @click="editing = !editing" v-show="editingInfo" class="info-btn" size="small" round>编辑资料</el-button>
         </div>
-        <div class="edit-container">
+        <div id="tabs">
+            <li class="tab active">基本信息</li>
+            <li class="tab">我的动态</li>
+            <li class="tab">我的二手商品动态</li>
+        </div>
+        <div class="edit-container" v-show="tab == 'info'">
             <span class="label">座右铭:</span>
             <span class="content" v-show="!editStyleText||!editing">{{this.styleText}}</span>
             <el-input
@@ -32,20 +37,34 @@
             </el-input>
             <span class="edit-text" @click="edit" v-show="editing&&!editStyleText">编辑</span>
             <el-button class="btn" size="mini"  @click="submit" type="danger" round v-show="editing&&editStyleText">提交</el-button>
-            <el-button class="btn" size="mini" @click="cancel" round v-show="editing&&editStyleText">取消</el-button>
+            <el-button class="btn" size="mini" @click="editStyleText = !editStyleText" round v-show="editing&&editStyleText">取消</el-button>
         </div>
+        <article v-show="tab == 'status'" v-for="(item) in statusList" :key="item.sid">
+            <status-card :item="item"></status-card>
+        </article>
+        <article v-show="tab == 'commodity-status'" v-for="(item) in commodityList" :key="item.sid">
+            <commodity-card :item="item"></commodity-card>
+        </article>
     </div>
 </template>
 <script>
-import {updateAccountImg,updateAccountInfo,getUserInfo} from '../api/communication';
+import {updateAccountImg,updateAccountInfo,getUserInfo,getUserStatus,getUserCommodityStatus} from '../api/communication';
+import CommodityCard from './CommodityCard.vue';
+import StatusCard from './StatusCard.vue';
 export default {
+    components:{CommodityCard,StatusCard},
     data() {
         return{
             uid: '',
             styleText: '',
             editInfostyleText: '',
             editing: false,
-            editStyleText: false
+            editStyleText: false,
+            editingInfo: true,
+            tab: 'info',
+            tabNames: ['info','status','commodity-status'],
+            statusList: [],
+            commodityList: []
         }
     },
     computed:{
@@ -59,7 +78,48 @@ export default {
             this.styleText = res.data.info.styleText;
         })
     },
+    mounted(){
+        this.initTabClick();
+    },
     methods:{
+        initTabClick(){
+            let tabs = document.getElementById('tabs').getElementsByClassName('tab');
+            for(let i = 0; i < tabs.length; i++){
+                 tabs[i].onclick = ()=>{
+                    for (let j = 0; j < tabs.length; j++) {
+                        if(tabs[j].classList.value.includes('active')){
+                            tabs[j].classList.remove('active')
+                        }
+                    }
+                    tabs[i].classList.add('active');
+                    this.tab = this.tabNames[i];
+                    if(i == 0){
+                        this.editingInfo = true;
+                    }else if(i == 1){
+                        this.editingInfo = false;
+                        this.updateStatus();
+                    }else{
+                        this.editingInfo = false;
+                        this.updateCommodityList();
+                    }
+                }
+            }
+        },
+        updateStatus(){
+            getUserStatus({
+                uid: this.uid
+            }).then(res=>{
+                this.statusList = res.data;
+            })
+        },
+        updateCommodityList(){
+            getUserCommodityStatus({
+                uid: this.uid
+            }).then(res=>{
+                console.log();
+                this.commodityList = res.data;
+            })
+        },
         handleAvatarSuccess(res,file){
             console.log('file',file);
             updateAccountImg({
@@ -70,16 +130,9 @@ export default {
                 this.$refs.upload.clearFiles();
             })
         },
-        // 编辑个人信息
-        editInfo(){
-            this.editing = !this.editing;
-        },
         edit(){
             this.editStyleText = !this.editStyleText;
             this.editInfostyleText = this.styleText;
-        },
-        cancel(){
-            this.editStyleText = !this.editStyleText;
         },
         submit(){
             updateAccountInfo({
@@ -101,6 +154,32 @@ export default {
 </script>
 <style lang="scss" scoped>
 #container{
+    #tabs{
+        .tab{
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            font-size: 18px;
+            font-weight: 500;
+            color: rgb(128, 122, 122);
+            margin: 0 10px 10px 0;
+            &:hover{
+                background: #ccc;
+                cursor: pointer;
+            }
+        }
+        .active{
+            color: #000;
+            background: #ccc;
+        }
+    }
+    .title-p{
+        display: inline-block;
+        border-bottom: 1px solid #000;
+        font-size: 18px;
+        font-weight: 500;
+        color: rgb(128, 122, 122);
+        margin-bottom: 10px;
+    }
     .info{
         display: flex;
         position: relative;
@@ -149,6 +228,40 @@ export default {
             height: 30px;
             margin-top: 12px;
             margin-left: 5px;
+        }
+    }
+    article {
+        width: 100%;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 19px;
+        line-height: 1.6em;
+        padding: 10px;
+        .add-btn{
+            position: absolute;
+            right: 0;
+        }
+        .status-avatar{
+            cursor: pointer;
+        }
+        .status-info{
+            font-size: 12px;
+            height: 20px;
+            line-height: 20px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin: 0px 10px;
+            padding: 5px;
+            vertical-align: text-top;
+        }
+        p{
+            padding: 10px;
+        }
+        .commodity-img{
+            width: 200px;
+            margin: 10px;
         }
     }
 }

@@ -10,12 +10,12 @@
             <div id="user-info">
                 <p class="user-name">{{receptionId}}</p>
             </div>
-            <div id="chat">
+            <div id="chat" ref="chat">
                 <ul>
                     <li v-for="item in chatContentsList" :key="item.cid" :class="[ item.sendId === $store.getters.uid ? 'chat-right' : 'chat-left' ,'chat-content']">
-                        <img class="user-img img-left" v-if="item.sendId !== $store.getters.uid" :src="item.uImageSrc" alt="111">
-                        <span>{{item.chatContents}}</span>
-                        <img class="user-img img-right" v-if="item.sendId === $store.getters.uid" :src="item.uImageSrc" alt="111">
+                        <el-avatar class="user-img img-left" v-if="item.sendId !== $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
+                        <span class="content-text">{{item.chatContents}}</span>
+                        <el-avatar class="user-img img-right" v-if="item.sendId === $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
                     </li>
                 </ul>
             </div>
@@ -44,6 +44,7 @@ export default {
             chatUserList: [],
             chatContentsList: [],
             sendText: '',
+            test:'http://localhost:3000/image_avatar/16470492094818E62A311-4C0B-4227-9956-050ADA651DF6.jpeg'
         }
     },
     created(){
@@ -120,6 +121,9 @@ export default {
             }).then(res=>{
                 this.chatContentsList = res.data
                 console.log('chatcontent...', this.chatContentsList);
+                this.$nextTick(()=>{
+                    this.$refs.chat.scrollTop = this.$refs.chat.scrollHeight;
+                })
             })
         },
         sendMessage(){
@@ -137,10 +141,10 @@ export default {
                     chatContents: this.sendText
                 };
                 createNewChatContents(message).then(()=>{
-                    this.$message({
-                        message: "消息发送成功",
-                        type: "success"
-                    });
+                    // this.$message({
+                    //     message: "消息发送成功",
+                    //     type: "success"
+                    // });
                     this.sendText = ''
                     this.updateChatListHandle();
                     _this.ws.send(JSON.stringify({type: 'chat',...message}));
@@ -150,6 +154,11 @@ export default {
     }
 }
 </script>
+<style>
+#send-text .el-textarea__inner{
+    height: 50px;
+}
+</style>
 <style lang="scss" scoped>
     #container{
         width: 100%;
@@ -196,7 +205,6 @@ export default {
         #content{
             height: 100%;
             flex: 1;
-            // background: #ddd;
             #user-info{
                 width: 100%;
                 height: 60px;
@@ -210,13 +218,15 @@ export default {
             }
             #chat{
                 height: 500px;
-                overflow-y:scroll;
-                // background-color: pink;
+                overflow-y: scroll;
                 padding: 10px 30px 0;
+                ul{
+                    overflow: hidden;
+                }
                 .chat-content{
                     margin-bottom: 10px;
                     clear: both;
-                    span{
+                    .content-text{
                         display: inline-block;
                         height: 40px;
                         line-height: 40px;
@@ -224,11 +234,7 @@ export default {
                         padding: 0 10px;
                     }
                     .user-img{
-                        width: 40px;
-                        // height: 40px;
-                        overflow: hidden;
                         margin-bottom: -12px;
-                        border-radius: 50%;
                     }
                     .img-left{
                         margin-right: 10px;
@@ -242,12 +248,10 @@ export default {
                 }
                 .chat-right{
                     float: right;
-
                 }
             }
             #send-text{
                 height: 50px;
-                // background-color: pink;
                 display: flex;
                 .btn{
                     height: 40px;

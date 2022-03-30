@@ -7,6 +7,7 @@ import './css/reset.css'
 // import './css/font.css'
 import './css/media.css'
 import "./api/element";
+import './css/iconfont.css'
 moment.locale('zh-cn');
 Vue.prototype.$moment = moment;
 Vue.config.productionTip = false

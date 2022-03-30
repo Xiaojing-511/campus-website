@@ -20,7 +20,9 @@ import {
     DropdownMenu,
     Tooltip,
     Dialog,
-    Upload
+    Upload,
+    Divider,
+    Tag
 } from 'element-ui';
 Vue.use(Form);
 Vue.use(FormItem);
@@ -41,5 +43,7 @@ Vue.use(DropdownMenu);
 Vue.use(Tooltip);
 Vue.use(Dialog);
 Vue.use(Upload);
+Vue.use(Divider);
+Vue.use(Tag);
 Vue.prototype.$message = Message;
 

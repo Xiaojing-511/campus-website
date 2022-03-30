@@ -15,6 +15,18 @@
                 show-word-limit
             >
             </el-input>
+            <div class="type">
+                <span>分类：</span>
+                <el-tag
+                    class="type-tag"
+                    @click="tagClick(item,index)"
+                    v-for="(item,index) in typeTags"
+                    :key="item.label"
+                    :type="item.type"
+                    effect="plain">
+                    {{ item.label }}
+                </el-tag>
+            </div>
             <el-upload
                 action="http://localhost:3000/addCommodityPhoto"
                 list-type="picture-card"
@@ -46,57 +58,53 @@
             </el-upload>
             <el-button type="primary" @click="submitForm()">立即发布</el-button>
         </div>
-        
     </el-dialog>
-
     <div class="container">
-        <el-button class="new-btn" size="mini" type="primary" round @click="showDialog()">我要发布</el-button>
+        <el-button class="new-btn" size="mini" type="primary" round @click="this.dialogVisible = !this.dialogVisible">我要发布</el-button>
     </div>
     <article v-for="(item) in commodityList" :key="item.cid">
-        <span>
-            <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
-        </span>
-        <span class="status-info" >{{item.uid}}</span>
-        <span class="status-info">{{item.createTime}}</span>
-        <p>{{item.contents}}</p>
-        <img class="commodity-img" v-for="(itemImg,index) in item.image" :key="index" :src="itemImg" alt=""/>
+        <commodity-card :item="item"></commodity-card>
     </article>
 </div>
 </template>
 <script>
+const notSelected = 'info',selected = '';
 import {
     createUserCommodityStatus,
-addUserCommodityStatusImg,
-// addCommodityPhoto,
-getUserCommodityStatus} from '../api/communication'
+    addUserCommodityStatusImg,
+    getAllUserCommodityStatus,
+    getCommodityTagTypes,
+} from '../api/communication'
+import CommodityCard from './CommodityCard.vue';
 export default {
+    components:{CommodityCard},
     data(){
         return {
-            uid: '',
+            uid: window.localStorage.getItem('uid'),
             dialogVisible: false,
             publishContent: '',
             cid: '',
             commodityList: [],
             fileList: [],
             commodityImageArr:[],
-            // dialogImageUrl:'',
-            // imgDialogVisible: false,
+            typeTags:[],
+            selectTag: ''
         }
     },
     created(){
         this.updateCommodityList();
-    },
-    mounted(){
-        this.uid = window.localStorage.getItem('uid');
+        this.getTagTypes();
     },
     methods: {
         updateCommodityList(){
-            getUserCommodityStatus().then(res=>{
+            getAllUserCommodityStatus().then(res=>{
                 this.commodityList = res.data;
             })
         },
         handleRemove(file) {
-            console.log(file,this.fileList);
+            this.fileList = this.fileList.filter((item)=>{
+                return item.uid !== file.uid
+            });
         },
         // 文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
         handleChange(file, fileList) {
@@ -105,13 +113,20 @@ export default {
         async submitForm(){
             let commodityStatusInfo = {
                 uid: this.uid,
-                type: 'book',
+                type: this.selectTag,
                 contents: this.publishContent,
                 image: ''
             }
             await createUserCommodityStatus(commodityStatusInfo).then(resData=>{
                 this.cid = resData.data.cid;
-                this.$refs.upload.submit();
+                if(this.fileList.length){
+                    this.$refs.upload.submit();
+                }else{
+                    this.dialogVisible = false;
+                    this.cid = this.publishContent = '';
+                    this.$message.success('发布成功！');
+                    this.updateCommodityList();
+                }
             })
         },
         handleAvatarSuccess(res){
@@ -134,36 +149,29 @@ export default {
             }
                       
         },
-        // handlePictureCardPreview(file) {
-        //     this.dialogImageUrl = file.url;
-        //     this.imgDialogVisible = true;
-        // },
-        // handleDownload(file) {
-        //     console.log(file);
-        // },
-        showDialog(){
-            this.dialogVisible = !this.dialogVisible;
-            // 问：取不到dialog内部dom
-            // 解：dialog在初始的时候没有加载,自然调用不到,当dialog显示时,需要用到nextTick,使dom更新之后再调用。就可以调用到了
-            // this.$nextTick(()=>{
-            //     document.querySelector('#file').onchange = function (){
-            //         if(this.files.length){
-            //             let file = this.files[0];
-            //             let reader = new FileReader();
-            //             console.log('file',file);
-            //             //新建 FileReader 对象
-            //             reader.onload = function(){
-            //                 // 当 FileReader 读取文件时候，读取的结果会放在 FileReader.result 属性中
-            //                 document.querySelector('#img').src = this.result;
-            //                 // document.querySelector('#text').innerHTML = this.result;
-            //             };
-            //             // 设置以什么方式读取文件，这里以base64方式
-            //             reader.readAsDataURL(file);
-            //         }
-            //     }
-            // })
-            
-        }
+        getTagTypes(){
+            getCommodityTagTypes().then(res=>{
+                let types = [];
+                res.data.forEach(item => {
+                    types.push({
+                        type: item == '其他' ? selected : notSelected,
+                        label: item
+                    })
+                });
+                this.typeTags = types;
+                this.selectTag = '其他';
+            })
+        },
+        tagClick(item,index){
+            if(item.type == notSelected){
+                this.typeTags = this.typeTags.map((item)=>{
+                    item.type = notSelected;
+                    return item;
+                })
+                this.$set(this.typeTags,index,{...item,type: selected});
+                this.selectTag = item.label;
+            }
+        }  
     }
 
 }
@@ -172,6 +180,9 @@ export default {
 .dialog .el-textarea__inner{
     border-color: transparent;
 }
+.dialog .el-upload{
+    margin: 10px 0;
+}
 </style>
 <style lang="scss" scoped>
 .dialog{
@@ -179,6 +190,18 @@ export default {
     height: 500px;
     position: relative;
     margin-top: -10px;
+    .type{
+        margin-top: 10px;
+        .type-tag{
+            margin-right: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            &:hover{
+                color: #32c1fb;
+                border-color: #32c1fb;
+            }
+        }
+    }
 }
 .container{
     position: relative;
@@ -198,31 +221,10 @@ article {
     background: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     border-radius: 10px;
-    // overflow: hidden;
     margin-bottom: 40px;
     font-size: 19px;
     line-height: 1.6em;
     padding: 10px;
-
-    .status-avatar{
-        cursor: pointer;
-    }
-    .status-info{
-        font-size: 12px;
-        height: 20px;
-        line-height: 20px;
-        background-color: #eee;
-        border-radius: 5px;
-        margin: 0px 10px;
-        padding: 5px;
-        vertical-align: text-top;
-    }
-    p{
-        padding: 10px;
-    }
-    .commodity-img{
-        width: 200px;
-        margin: 10px;
-    }
 }
+
 </style>
