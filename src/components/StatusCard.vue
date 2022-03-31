@@ -4,7 +4,7 @@
         <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
     </info-dialog>
     <span class="status-info-user" >{{item.uid}}</span>
-    <p>{{item.contents}}</p>
+    <p style="padding: 10px;">{{item.contents}}</p>
     <span class="status-info-time">{{item.createTime}}</span>
     <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid">删除</span>
     <el-dialog
@@ -18,10 +18,46 @@
             <el-button type="primary" @click="deleteStatus(item.sid)">确 定</el-button>
         </span>
     </el-dialog>
+    <div class="commodity-operation">
+        <div class="box" v-show="showDetail">
+            <div class="icon">
+                <i class="iconfont icon-heart"></i>
+                <span>赞</span>
+            </div>
+            <div class="icon" @click="commentHandle">
+                <i class="el-icon-chat-square"></i>
+                <span>评论</span>
+            </div>
+        </div>
+        <div class="i-box" @click="showDetail = !showDetail">
+            <i class="el-icon-more"></i>
+        </div>
+    </div>
+    <div class="comment-input" v-show="commentInput" ref="commentInput">
+        <el-input
+            id="commentInput"
+            type="textarea"
+            placeholder="评论点什么..."
+            v-model="commentContent"
+            :rows="2"
+            maxlength="50"
+            show-word-limit
+        >
+        </el-input>
+        <el-button :disabled="commentContent.length == 0" @click="sendComment">发送</el-button>
+    </div>
+    <div id="comments">
+        <p class="comment" v-for="item in commentsList" :key="item.ccid">
+            <info-dialog :userId="item.commentUser">
+                <span class="user">{{item.commentUser}}</span>:
+            </info-dialog>
+            <span class="content">{{item.commentContent}}</span>
+        </p>
+    </div>
 </div>
 </template>
 <script>
-import { deleteUserStatus } from '@/api/communication'
+import { deleteUserStatus,getStatusComment,addStatusComment } from '@/api/communication'
 import InfoDialog from './InfoDialog.vue';
 export default {
     components:{InfoDialog},
@@ -29,10 +65,28 @@ export default {
         return {
             uid: window.localStorage.getItem('uid'),
             deleteDialogVisible: false,
+            showDetail: false,
+            commentInput: false,
+            commentContent: '',
+            commentsList: [],
         }
     },
     props:['item'],
+    created(){
+        this.getStatusComment();
+        document.addEventListener('click', this.listenerHandle,true)
+    },
+    beforeDestroy(){
+        document.removeEventListener('click', this.listenerHandle,true)
+    },
     methods:{
+        getStatusComment(){
+            getStatusComment({
+                sid: this.item.sid
+            }).then(res=>{
+                this.commentsList = res.data;
+            })
+        },
         deleteStatus(sid){
             console.log('sid',sid);
             deleteUserStatus({sid}).then(res=>{
@@ -44,6 +98,29 @@ export default {
                         type: "success"
                     });
                     this.$parent.getStatus();
+                }
+            })
+        },
+        commentHandle(){
+            this.commentInput = true;
+            this.showDetail = !this.showDetail;
+        },
+        listenerHandle(e){
+            this.$refs.commentInput && this.commentInput && !this.$refs.commentInput.contains(e.target) ? 
+            this.commentInput = false : '';
+        },
+        sendComment(){
+            addStatusComment({
+                sid: this.item.sid,
+                commentUser: this.uid,
+                commentContent: this.commentContent
+            }).then(res=>{
+                if(res.status === 200){
+                    this.commentContent = '';
+                    this.getStatusComment();
+                    this.commentInput = false;
+                }else{
+                    console.log(res);
                 }
             })
         }
@@ -76,7 +153,68 @@ export default {
     color: #576C95;
     cursor: pointer;
 }
-p{
-    padding: 10px;
+.commodity-operation{
+    position: relative;
+    height: 30px;
+    .box{
+        width: 150px;
+        height: 30px;
+        padding: 5px;
+        background: #4C5054;
+        position: absolute;
+        right: 40px;
+        top: -10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between; 
+        .icon{
+            width: 70px;
+            display: inline-block;
+            cursor: pointer;
+            color: #fff;
+            text-align: center;
+            i{
+                font-size: 20px;
+            }
+            span{
+                margin-left: 2px;
+                font-size: 14px;
+                vertical-align: top;
+            }
+        }
+    }
+    .i-box{
+        width: 30px;
+        height: 20px;
+        line-height: 20px;
+        background: #F7F7F7;
+        border-radius: 4px;
+        text-align: center;
+        position: absolute;
+        right: 0;
+        cursor: pointer;
+        i{
+            color: #576B95;
+        }
+    }
+}
+.comment-input{
+    display: flex;
+}
+#comments{
+    width: 100%;
+    font-size: 14px;
+    background-color: #F7F7F8;
+    .comment{
+        border-bottom: 1px solid #EAEAEA;
+        .user{
+            color: #576C95;
+            margin: 0 2px 0 10px;
+            cursor: pointer;
+        }
+        .content{
+            color: #181818;
+        }
+    }
 }
 </style>

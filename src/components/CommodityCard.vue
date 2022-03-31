@@ -25,14 +25,13 @@
                     </span>
                 </el-dialog>
             </p>
-
             <div class="commodity-operation">
                 <div class="box" v-show="showDetail">
                     <div class="icon">
                         <i class="iconfont icon-heart"></i>
                         <span>赞</span>
                     </div>
-                    <div class="icon" @click="commentHandle(item)">
+                    <div class="icon" @click="commentHandle">
                         <i class="el-icon-chat-square"></i>
                         <span>评论</span>
                     </div>

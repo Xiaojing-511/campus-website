@@ -56,6 +56,20 @@ export const getUserStatus = (params) => {
         data: params
     })
 }
+export const getStatusComment = (params) => {
+    return request({
+        url: '/api/getStatusComment',
+        method: 'post',
+        data: params
+    })
+}
+export const addStatusComment = (params) => {
+    return request({
+        url: '/api/addStatusComment',
+        method: 'post',
+        data: params
+    })
+}
 export const deleteUserStatus = (params) => {
     return request({
         url: '/api/deleteUserStatus',

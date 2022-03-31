@@ -60,7 +60,7 @@
         </div>
     </el-dialog>
     <div class="container">
-        <el-button class="new-btn" size="mini" type="primary" round @click="this.dialogVisible = !this.dialogVisible">我要发布</el-button>
+        <el-button class="new-btn" size="mini" type="primary" round @click="dialogVisible = !dialogVisible">我要发布</el-button>
     </div>
     <article v-for="(item) in commodityList" :key="item.cid">
         <commodity-card :item="item"></commodity-card>
