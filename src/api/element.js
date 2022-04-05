@@ -22,7 +22,10 @@ import {
     Dialog,
     Upload,
     Divider,
-    Tag
+    Tag,
+    Image,
+    CheckboxGroup,
+    Checkbox
 } from 'element-ui';
 Vue.use(Form);
 Vue.use(FormItem);
@@ -45,5 +48,9 @@ Vue.use(Dialog);
 Vue.use(Upload);
 Vue.use(Divider);
 Vue.use(Tag);
+Vue.use(Image);
+Vue.use(CheckboxGroup);
+Vue.use(Checkbox);
+
 Vue.prototype.$message = Message;
 

@@ -1,6 +1,30 @@
 <template>
     <div id="container">
+        <el-dialog
+        title="群发公告"
+        :visible.sync="sendMoreDialogVisible"
+        width="40%"
+        >
+            <el-input
+                type="textarea"
+                placeholder="请输入消息内容"
+                v-model="sendContents"
+                :rows="4"
+                maxlength="100"
+                show-word-limit
+            >
+            </el-input>
+            <p style="margin: 10px 0">发送给:</p>
+            <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+            <div class="checkbox-box">
+                <el-checkbox-group v-model="sendUsers" @change="checkboxChange">
+                    <el-checkbox :label="item" v-for="item in checkboxList" :key="item"></el-checkbox>
+                </el-checkbox-group>
+            </div>
+            <el-button type="primary" size="small" @click="sendMoreMessage">群发消息</el-button>
+        </el-dialog>
         <div id="side">
+            <el-button class="more-send-btn" type="primary" size="small" round @click="clickSendMore">群发消息</el-button>
             <ul ref="chatList">
                 <li v-for="item in chatUserList" :key="item.ufid" class="list-item">{{item.ufriendId}}</li>
             </ul>
@@ -34,7 +58,7 @@
     </div>
 </template>
 <script>
-import {createNewChatContents,getChatList,getUserFriends} from '../api/communication';
+import {createNewChatContents,getChatList,getUserFriends,sendMoreChatContents} from '../api/communication';
 import { initWebsocket } from '../api/common';
 export default {
     data() {
@@ -44,7 +68,12 @@ export default {
             chatUserList: [],
             chatContentsList: [],
             sendText: '',
-            test:'http://localhost:3000/image_avatar/16470492094818E62A311-4C0B-4227-9956-050ADA651DF6.jpeg'
+            sendMoreDialogVisible: false,
+            sendUsers:[],
+            sendContents: '',
+            checkAll: false,
+            isIndeterminate: false,
+            checkboxList: [],
         }
     },
     created(){
@@ -150,13 +179,69 @@ export default {
                     _this.ws.send(JSON.stringify({type: 'chat',...message}));
                 })
             }
-        }
+        },
+        clickSendMore(){
+            this.sendMoreDialogVisible = !this.sendMoreDialogVisible;
+            let list = [];
+            this.chatUserList.forEach(item=>{
+                list.push(item.ufriendId);
+            })
+            this.checkboxList = list;
+            console.log('this.checkboxList',this.checkboxList);
+        },
+        checkboxChange(checkboxGroup){
+            console.log('change', this.sendInfo,checkboxGroup);
+        },
+        sendMoreMessage(){
+            if(!this.sendContents.trim()){
+                this.$message({
+                    type: 'warning',
+                    message: '不能群发空消息！'
+                })
+            }else if(!this.sendUsers.length){
+                this.$message({
+                    type: 'warning',
+                    message: '未选择群发用户！'
+                })
+            }else{
+                sendMoreChatContents({
+                    sendId: this.sendId,
+                    receptionIds: this.sendUsers,
+                    chatContents: this.sendContents
+                }).then(res=>{
+                    if(res.status === 200){
+                        this.$message({
+                            type: 'success',
+                            message: '群发消息成功'
+                        });
+                        this.sendMoreDialogVisible = ! this.sendMoreDialogVisible;
+                        this.sendUsers = [];
+                        this.sendContents = '';
+                        this.updateChatListHandle();
+                    }
+                })
+                console.log('send...',this.sendUsers,this.sendContents );
+            }
+        },
+        handleCheckAllChange(val) {
+            this.sendUsers = val ? this.checkboxList : [];
+            this.isIndeterminate = false;
+        },
+
+
     }
 }
 </script>
 <style>
 #send-text .el-textarea__inner{
     height: 50px;
+}
+.checkbox-box .el-checkbox{
+    display: block;
+    margin: 10px 0;
+}
+.checkbox-box .el-checkbox .el-checkbox__inner{
+    border-radius: 50%;
 }
 </style>
 <style lang="scss" scoped>
@@ -166,9 +251,20 @@ export default {
         background-color: #fff;
         display: flex;
         margin-top: -20px;
+        .checkbox-box{
+            height: 150px;
+            overflow: scroll;
+            margin-bottom: 10px;
+        }
         #side{
             width: 200px;
             height: 100%;
+            position: relative;
+            .more-send-btn{
+                position: absolute;
+                top: 15px;
+                left: 10px;
+            }
             ul{
                 width: 100%;
                 margin-top: 60px;
@@ -178,7 +274,6 @@ export default {
                     height: 60px;
                     background-color: #eee;
                     padding: 10px;
-                    // margin-bottom: 10px;
                     cursor: pointer;
                     &:hover{
                         background-color: #ddd;

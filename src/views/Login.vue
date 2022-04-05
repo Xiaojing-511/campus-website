@@ -1,6 +1,6 @@
 <template>
   <div id="container">
-    <el-form v-if="type === 'register'" :model="loginForm" :rules="loginRules" ref="loginForm" label-width="100px">
+    <el-form v-if="type === 'login'" :model="loginForm" :rules="loginRules" ref="loginForm" label-width="100px">
       <el-form-item label="账号" prop="id">
         <el-input v-model="loginForm.id" clearable></el-input>
       </el-form-item>
@@ -8,7 +8,7 @@
         <el-input v-model="loginForm.pass" clearable type="password"></el-input>
       </el-form-item>
     </el-form>
-    <el-form v-if="type === 'login'" :model="registerForm" :rules="rules" ref="registerForm" label-width="100px">
+    <el-form v-if="type === 'register'" :model="registerForm" :rules="rules" ref="registerForm" label-width="100px">
       <el-form-item label="账号" prop="id">
         <el-input v-model="registerForm.id" clearable></el-input>
       </el-form-item>
@@ -56,18 +56,27 @@
         <el-input v-model="registerForm.styleText" clearable></el-input>
       </el-form-item>
     </el-form>
-    <p class="skip-text" v-show="type === 'register'" @click="changeType('login')">没有账号? 去注册</p>
-    <p class="skip-text" v-show="type === 'login'" @click="changeType('register')">已有账号,去登陆</p>
-    <el-button class="submit-btn" @click="register('registerForm')" v-show="type === 'login'" type="primary">注册</el-button>
-    <el-button class="submit-btn" @click="login('loginForm')" v-show="type === 'register'" type="primary">登陆</el-button>
+    <p class="skip-text" v-show="type === 'login'" @click="changeType('register')">没有账号? 去注册</p>
+    <p class="skip-text" v-show="type === 'register'" @click="changeType('login')">已有账号,去登陆</p>
+    <el-button class="submit-btn" @click="register('registerForm')" v-show="type === 'register'" type="primary">注册</el-button>
+    <el-button class="submit-btn" @click="login('loginForm')" v-show="type === 'login'" type="primary">登陆</el-button>
     <el-button class="reset-btn" @click="resetForm">重置</el-button>
   </div>
 </template>
 <script>
-import { getUserLogin,createAccount } from "@/api/communication";
+import { getUserLogin,createAccount,juageUserIdOnly } from "@/api/communication";
 // import { judgeEmptyStr } from '@/api/common';
 export default {
   data() {
+    var validateId = (rule, value, callback) => {
+      juageUserIdOnly({uid: value}).then(res=>{
+        if(!res.data.isOnly){
+          callback(new Error('账号重复,换个名字吧～'));
+        }else{
+          callback();
+        }
+      })
+    };
     var validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'));
@@ -88,7 +97,7 @@ export default {
       }
     };
     return {
-      type: 'register',
+      type: 'login',
       loginForm:{
         id: '',
         pass: ''
@@ -105,7 +114,6 @@ export default {
       loginRules:{
         id: [
           { required: true, message: '请输入账号', trigger: 'blur' },
-          // { min: 5, max: 15, message: '长度在 5 到 15 个字符', trigger: 'blur' }
         ],
         pass: [
           { required: true, message: '请输入密码', trigger: 'blur' },
@@ -115,7 +123,8 @@ export default {
       rules: {
         id: [
           { required: true, message: '请输入注册账号名称', trigger: 'blur' },
-          { min: 1, max: 10, message: '长度在 1 到 10 个字符', trigger: 'blur' }
+          { min: 1, max: 15, message: '长度在 1 到 15 个字符', trigger: 'blur' },
+          { validator: validateId, trigger: 'blur' }
         ],
         pass: [
           { required: true, message: '请输入密码', trigger: 'blur' },
@@ -149,7 +158,7 @@ export default {
     // 切换状态
     changeType(type){
       this.type = type;
-      let formName = this.type === 'login' ? 'loginForm' : 'registerForm';
+      let formName = this.type === 'login' ? 'registerForm' : 'loginForm';
       this.$refs[formName].resetFields();
     },
     // 注册新账号
@@ -171,7 +180,7 @@ export default {
                   type: "success"
                 });
                 this.resetForm();
-                this.type = 'register';
+                this.type = 'login';
               } else {
                 this.$message({
                   message: "注册账户失败，请重试！",
@@ -210,7 +219,7 @@ export default {
       })
     },
     resetForm() {
-      let formName = this.type === 'register' ? 'loginForm' : 'registerForm';
+      let formName = this.type === 'register' ? 'registerForm' : 'loginForm';
       this.$refs[formName].resetFields();
     }
   }

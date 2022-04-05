@@ -5,7 +5,7 @@
         <nav id="nav-header">
             <ul ref="navUl"> 
                 <li class="menu-item active">
-                    <router-link to="/main/home">动态</router-link>
+                    <router-link to="/main/status">动态</router-link>
                 </li>
                 <li class="menu-item">
                     <router-link to="/main/chat">聊天</router-link> 
@@ -54,7 +54,7 @@ export default {
                 }
             }
             switch(name){
-                case 'Home': oLis[0].classList.add('active');break;
+                case 'Status': oLis[0].classList.add('active');break;
                 case 'Chat': oLis[1].classList.add('active');break;
                 case 'Commodity': oLis[2].classList.add('active');break;
                 case 'Info': oLis[3].classList.add('active');break;

@@ -4,55 +4,67 @@
         <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
     </info-dialog>
     <span class="status-info-user" >{{item.uid}}</span>
-    <p style="padding: 10px;">{{item.contents}}</p>
-    <span class="status-info-time">{{item.createTime}}</span>
-    <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid">删除</span>
-    <el-dialog
-        title="提示"
-        :visible.sync="deleteDialogVisible"
-        width="30%"
-        center>
-        <span>确认要删除该条动态吗？删除后不可恢复</span>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="deleteDialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="deleteStatus(item.sid)">确 定</el-button>
-        </span>
-    </el-dialog>
-    <div class="commodity-operation">
-        <div class="box" v-show="showDetail">
-            <div class="icon">
-                <i class="iconfont icon-heart"></i>
-                <span>赞</span>
-            </div>
-            <div class="icon" @click="commentHandle">
-                <i class="el-icon-chat-square"></i>
-                <span>评论</span>
+    <div class="status-content">
+        <p class="status-contents">{{item.contents}}</p>
+        <div class="img-box" v-for="(itemImg,index) in item.image" :key="index" >
+            <div>
+                <el-image class="status-img" :src="itemImg" :preview-src-list="[itemImg]" alt=""/>
             </div>
         </div>
-        <div class="i-box" @click="showDetail = !showDetail">
-            <i class="el-icon-more"></i>
+        <div>
+            <el-tag>{{item.type}}</el-tag>
         </div>
-    </div>
-    <div class="comment-input" v-show="commentInput" ref="commentInput">
-        <el-input
-            id="commentInput"
-            type="textarea"
-            placeholder="评论点什么..."
-            v-model="commentContent"
-            :rows="2"
-            maxlength="50"
-            show-word-limit
-        >
-        </el-input>
-        <el-button :disabled="commentContent.length == 0" @click="sendComment">发送</el-button>
-    </div>
-    <div id="comments">
-        <p class="comment" v-for="item in commentsList" :key="item.ccid">
-            <info-dialog :userId="item.commentUser">
-                <span class="user">{{item.commentUser}}</span>:
-            </info-dialog>
-            <span class="content">{{item.commentContent}}</span>
+        <p>
+            <span class="status-info-time">{{item.createTime}}</span>
+            <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid">删除</span>
+            <el-dialog
+                title="提示"
+                :visible.sync="deleteDialogVisible"
+                width="30%"
+                center>
+                <span>确认要删除该条动态吗？删除后不可恢复</span>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="deleteDialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="deleteStatus(item.sid)">确 定</el-button>
+                </span>
+            </el-dialog>
         </p>
+        <div class="commodity-operation">
+            <div class="box" v-show="showDetail">
+                <div class="icon">
+                    <i class="iconfont icon-heart"></i>
+                    <span>赞</span>
+                </div>
+                <div class="icon" @click="commentHandle">
+                    <i class="el-icon-chat-square"></i>
+                    <span>评论</span>
+                </div>
+            </div>
+            <div class="i-box" @click="showDetail = !showDetail">
+                <i class="el-icon-more"></i>
+            </div>
+        </div>
+        <div class="comment-input" v-show="commentInput" ref="commentInput">
+            <el-input
+                id="commentInput"
+                type="textarea"
+                placeholder="评论点什么..."
+                v-model="commentContent"
+                :rows="2"
+                maxlength="50"
+                show-word-limit
+            >
+            </el-input>
+            <el-button :disabled="commentContent.length == 0" @click="sendComment">发送</el-button>
+        </div>
+        <div id="comments">
+            <p class="comment" v-for="item in commentsList" :key="item.ccid">
+                <info-dialog :userId="item.commentUser">
+                    <span class="user">{{item.commentUser}}</span>:
+                </info-dialog>
+                <span class="content">{{item.commentContent}}</span>
+            </p>
+        </div>
     </div>
 </div>
 </template>
@@ -128,10 +140,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.add-btn{
-    position: absolute;
-    right: 0;
-}
 .status-avatar{
     cursor: pointer;
 }
@@ -142,78 +150,96 @@ export default {
     margin: 0px 10px;
     vertical-align: text-top;
 }
-.status-info-time{
-    color: #aaa;
-    font-size: 12px;
-    margin: 0px 10px;
-    vertical-align: text-top;
-}
-.delete{
-    font-size: 12px;
-    color: #576C95;
-    cursor: pointer;
-}
-.commodity-operation{
-    position: relative;
-    height: 30px;
-    .box{
-        width: 150px;
-        height: 30px;
-        padding: 5px;
-        background: #4C5054;
-        position: absolute;
-        right: 40px;
-        top: -10px;
-        border-radius: 5px;
-        display: flex;
-        justify-content: space-between; 
-        .icon{
-            width: 70px;
-            display: inline-block;
-            cursor: pointer;
-            color: #fff;
-            text-align: center;
-            i{
-                font-size: 20px;
-            }
-            span{
-                margin-left: 2px;
-                font-size: 14px;
-                vertical-align: top;
-            }
+.status-content{
+    margin-left: 10px;
+    .status-contents{
+        color: #181818;
+        margin-bottom: 5px;
+    }
+    .img-box{
+        display: inline-block;
+        width: 250px;
+        height: 250px;
+        overflow: hidden;
+        margin-right: 10px;
+        margin-bottom: 0;
+        .status-img{
+            width: 100%;
+            height: 100%;
         }
     }
-    .i-box{
-        width: 30px;
-        height: 20px;
-        line-height: 20px;
-        background: #F7F7F7;
-        border-radius: 4px;
-        text-align: center;
-        position: absolute;
-        right: 0;
+    .status-info-time{
+        color: #aaa;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+    .delete{
+        font-size: 12px;
+        color: #576C95;
         cursor: pointer;
-        i{
-            color: #576B95;
+    }
+    .commodity-operation{
+        position: relative;
+        height: 30px;
+        .box{
+            width: 150px;
+            height: 30px;
+            padding: 5px;
+            background: #4C5054;
+            position: absolute;
+            right: 40px;
+            top: -10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between; 
+            .icon{
+                width: 70px;
+                display: inline-block;
+                cursor: pointer;
+                color: #fff;
+                text-align: center;
+                i{
+                    font-size: 20px;
+                }
+                span{
+                    margin-left: 2px;
+                    font-size: 14px;
+                    vertical-align: top;
+                }
+            }
+        }
+        .i-box{
+            width: 30px;
+            height: 20px;
+            line-height: 20px;
+            background: #F7F7F7;
+            border-radius: 4px;
+            text-align: center;
+            position: absolute;
+            right: 0;
+            cursor: pointer;
+            i{
+                color: #576B95;
+            }
         }
     }
-}
-.comment-input{
-    display: flex;
-}
-#comments{
-    width: 100%;
-    font-size: 14px;
-    background-color: #F7F7F8;
-    .comment{
-        border-bottom: 1px solid #EAEAEA;
-        .user{
-            color: #576C95;
-            margin: 0 2px 0 10px;
-            cursor: pointer;
-        }
-        .content{
-            color: #181818;
+    .comment-input{
+        display: flex;
+    }
+    #comments{
+        width: 100%;
+        font-size: 14px;
+        background-color: #F7F7F8;
+        .comment{
+            border-bottom: 1px solid #EAEAEA;
+            .user{
+                color: #576C95;
+                margin: 0 2px 0 10px;
+                cursor: pointer;
+            }
+            .content{
+                color: #181818;
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 <template>
 <div>
     <el-dialog
-        title="发布二手商品"
+        title="发布动态"
         :visible.sync="dialogVisible"
         width="55%"
     >
@@ -28,10 +28,10 @@
                 </el-tag>
             </div>
             <el-upload
-                action="http://localhost:3000/addCommodityPhoto"
+                action="http://localhost:3000/addStatusPhoto"
                 list-type="picture-card"
                 ref="upload"
-                name="filecommodity"
+                name="filestatus"
                 accept="jpg, png, jpeg"
                 :on-change="handleChange"
                 :on-success="handleAvatarSuccess"
@@ -59,8 +59,8 @@
             <el-button type="primary" @click="submitForm()">立即发布</el-button>
         </div>
     </el-dialog>
-    <div class="container">
-        <el-button class="new-btn" size="mini" type="primary" round @click="dialogVisible = !dialogVisible">我要发布</el-button>
+    <div id="new-state">
+        <el-button class="new-btn" size="mini" type="primary" round @click="dialogVisible = !dialogVisible">发条动态</el-button>
         <div class="type-box">
             <el-tag
                 class="type-tag"
@@ -73,105 +73,47 @@
             </el-tag>
         </div>
     </div>
-    <article v-for="(item) in commodityList" :key="item.cid">
-        <commodity-card :item="item"></commodity-card>
+    <article v-for="(item) in statusList" :key="item.sid">
+        <status-card :item = "item"></status-card>
     </article>
-    <p v-if="!commodityList.length" style="color: #aaa;font-size:14px">没有啦...做第一个发布者吧！</p>
+    <p v-if="!statusList.length" style="color: #aaa;font-size:14px">没有啦...做第一个发布者吧！</p>
     <p v-else style="color: #aaa;font-size:14px">到底啦...</p>
 </div>
 </template>
 <script>
+// import { judgeEmptyStr } from '@/api/common';
 const notSelected = 'info',selected = '';
-import {
-    createUserCommodityStatus,
-    addUserCommodityStatusImg,
-    getAllUserCommodityStatus,
-    getTypesCommodityStatus,
-    getCommodityTagTypes,
-} from '../api/communication'
-import CommodityCard from './CommodityCard.vue';
+import StatusCard from './StatusCard.vue';
+import { createUserStatus,getAllUserStatus,addUserStatusImg,getStatusTagTypes,getTypesStatus } from '@/api/communication'
 export default {
-    components:{CommodityCard},
-    data(){
+    components:{StatusCard},
+    data() {
         return {
             uid: window.localStorage.getItem('uid'),
+            statusList: [],
+            newText: '',
+            isWriting: false,
             dialogVisible: false,
             publishContent: '',
-            cid: '',
-            commodityList: [],
             fileList: [],
-            commodityImageArr:[],
-            typeTags:[],
+            statusImageArr: [],
+            sid: '',
+            typeTags: [],
             allTypeTags:[],
             selectTag: '',
             selectCheckTags: [],
+
         }
     },
     async created(){
-        await this.getTagTypes();
-        await this.updateCommodityList();
+        await this.getStatusTypes();
+        await this.getStatus();
     },
-    methods: {
-        async updateCommodityList(){
-            if(this.selectCheckTags.includes('全部')){
-                getAllUserCommodityStatus().then(res=>{
-                    this.commodityList = res.data;
-                })
-            }else{
-                getTypesCommodityStatus({commodityTypes: this.selectCheckTags}).then(res=>{
-                    this.commodityList = res.data;
-                })
-            }
-        },
-        handleRemove(file) {
-            this.fileList = this.fileList.filter((item)=>{
-                return item.uid !== file.uid
-            });
-        },
-        // 文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
-        handleChange(file, fileList) {
-            this.fileList = fileList;
-        },
-        async submitForm(){
-            let commodityStatusInfo = {
-                uid: this.uid,
-                type: this.selectTag,
-                contents: this.publishContent,
-                image: ''
-            }
-            await createUserCommodityStatus(commodityStatusInfo).then(resData=>{
-                this.cid = resData.data.cid;
-                if(this.fileList.length){
-                    this.$refs.upload.submit();
-                }else{
-                    this.dialogVisible = false;
-                    this.cid = this.publishContent = '';
-                    this.$message.success('发布成功！');
-                    this.updateCommodityList();
-                }
-            })
-        },
-        handleAvatarSuccess(res){
-            this.commodityImageArr.push(res.imgName);
-            if(this.fileList.length == this.commodityImageArr.length){
-                 addUserCommodityStatusImg({
-                    cid: this.cid,
-                    imgName: this.commodityImageArr
-                }).then(res=>{
-                    if(res.status == 200){
-                        this.dialogVisible = false;
-                        this.cid = this.publishContent = '';
-                        this.$refs.upload.clearFiles();
-                        this.fileList = [];
-                        this.commodityImageArr = [];
-                        this.$message.success('发布成功！');
-                        this.updateCommodityList();
-                    }
-                }) 
-            }           
-        },
-        async getTagTypes(){
-            await getCommodityTagTypes().then(res=>{
+    mounted(){
+    },
+    methods:{
+        async getStatusTypes(){
+            await getStatusTagTypes().then(res=>{
                 let types = [],allTypes = [];
                 allTypes.push({type: selected,label:'全部'});
                 res.data.forEach(item => {
@@ -189,6 +131,59 @@ export default {
                 this.selectTag = '其他';
                 this.selectCheckTags = ['全部'];
             })
+        },
+        async getStatus(){
+            if(this.selectCheckTags.includes('全部')){
+                getAllUserStatus().then(res=>{
+                    this.statusList = res.data;
+                })
+            }else{
+                getTypesStatus({statusTypes: this.selectCheckTags}).then(res=>{
+                    this.statusList = res.data;
+                })
+            }
+        },
+        handleChange(file, fileList) {
+            this.fileList = fileList;
+        },
+        async submitForm(){
+            let statusInfo = {
+                uid: this.uid,
+                type: this.selectTag,
+                contents: this.publishContent,
+                image: ''
+            }
+            await createUserStatus(statusInfo).then(resData=>{
+                this.sid = resData.data.sid;
+                if(this.fileList.length){
+                    this.$refs.upload.submit();
+                }else{
+                    this.dialogVisible = false;
+                    this.sid = this.publishContent = '';
+                    this.$message.success('发布成功！');
+                    this.getStatus();
+                }
+            })
+        },
+        handleAvatarSuccess(res){
+            this.statusImageArr.push(res.imgName);
+            if(this.fileList.length == this.statusImageArr.length){
+                console.log('statusImageArr', this.statusImageArr);
+                 addUserStatusImg({
+                    sid: this.sid,
+                    imgName: this.statusImageArr
+                }).then(res=>{
+                    if(res.status == 200){
+                        this.dialogVisible = false;
+                        this.sid = this.publishContent = '';
+                        this.$refs.upload.clearFiles();
+                        this.fileList = [];
+                        this.statusImageArr = [];
+                        this.$message.success('发布成功！');
+                        this.getStatus();
+                    }
+                }) 
+            }           
         },
         tagClick(item,index){
             if(item.type == notSelected){
@@ -229,20 +224,11 @@ export default {
                 })
                 this.selectCheckTags.splice(this.selectCheckTags.indexOf(item.label),1);
             }
-            this.updateCommodityList();
+            this.getStatus();
         }
     }
-
 }
 </script>
-<style>
-.dialog .el-textarea__inner{
-    border-color: transparent;
-}
-.dialog .el-upload{
-    margin: 10px 0;
-}
-</style>
 <style lang="scss" scoped>
 .type-tag{
     margin-right: 10px;
@@ -254,40 +240,40 @@ export default {
     }
 }
 .dialog{
-    width: 100%;
-    height: 500px;
-    position: relative;
-    margin-top: -10px;
     .type{
         margin-top: 10px;
     }
 }
-.container{
-    position: relative;
+#new-state{
     height: 90px;
+    display: flex;
     margin-bottom: 10px;
     margin-top: -20px;
+    position: relative;
     .type-box{
         position: absolute;
         bottom: 0;
-    }   
+    }
+    .btn{
+        height: 40px;
+        margin: 7px 5px 0 10px;
+    }
     .new-btn{
         height: 40px;
         position: absolute;
         top: 7px;
         right: 5px;
     }
-
 }
 article {
     width: 100%;
     background: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     border-radius: 10px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     font-size: 19px;
     line-height: 1.6em;
     padding: 10px;
+    
 }
-
 </style>

@@ -6,7 +6,11 @@
         <span class="status-info-user" >{{item.uid}}</span>
         <div class="status-content">
             <p>{{item.contents}}</p>
-            <img class="commodity-img" v-for="(itemImg,index) in item.image" :key="index" :src="itemImg" alt=""/>
+            <div class="img-box" v-for="(itemImg,index) in item.image" :key="index" >
+                <div>
+                    <el-image class="commodity-img" :src="itemImg" :preview-src-list="[itemImg]" alt=""/>
+                </div>
+            </div>
             <div>
                 <el-tag>{{item.type}}</el-tag>
             </div>
@@ -209,10 +213,20 @@ export default {
     }
     p{
         color: #181818;
+        margin-bottom: 5px;
     }
-    .commodity-img{
-        width: 200px;
-        margin: 10px 10px 0px 0px;
+    .img-box{
+        display: inline-block;
+        width: 250px;
+        height: 250px;
+        overflow: hidden;
+        margin-right: 10px;
+        margin-bottom: 0;
+        .commodity-img{
+            width: 100%;
+            height: 100%;
+            // margin: 10px 10px 0px 0px;
+        }
     }
     .commodity-operation{
         position: relative;

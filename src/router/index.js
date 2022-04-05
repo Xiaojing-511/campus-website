@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../components/Home.vue';
+import Status from '../components/Status.vue';
 import Chat from '../components/Chat.vue';
 import Commodity from '../components/Commodity.vue';
 import Info from '../components/Info.vue';
@@ -20,13 +20,13 @@ const routes = [
   {
     path: '/main',
     name: 'Main',
-    redirect: '/main/home',
+    redirect: '/main/status',
     component: () => import(/* webpackChunkName: "Main" */ '../views/Main.vue'),
     children:[
       {
-        path: 'home',
-        name: 'Home',
-        component: Home
+        path: 'status',
+        name: 'Status',
+        component: Status
       },
       {
         path: 'chat',

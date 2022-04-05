@@ -21,6 +21,13 @@ export const getUserInfo = (params) => {
         data: params
     })
 }
+export const juageUserIdOnly = (params) => {
+    return request({
+        url: '/api/isOnlyUserId',
+        method: 'post',
+        data: params
+    })
+}
 export const updateAccountImg = (params) => {
     return request({
         url: '/api/updateAccountImg',
@@ -49,9 +56,23 @@ export const getAllUserStatus = (params) => {
         data: params
     })
 }
+export const getTypesStatus = (params) => {
+    return request({
+        url: '/api/getTypesStatus',
+        method: 'post',
+        data: params
+    })
+}
 export const getUserStatus = (params) => {
     return request({
         url: '/api/getUserStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const addUserStatusImg = (params) => {
+    return request({
+        url: '/api/addUserStatusImg',
         method: 'post',
         data: params
     })
@@ -77,9 +98,23 @@ export const deleteUserStatus = (params) => {
         data: params
     })
 }
+export const getStatusTagTypes = (params) => {
+    return request({
+        url: '/api/getStatusTagTypes',
+        method: 'get',
+        data: params
+    })
+}
 export const createNewChatContents = (params) => {
     return request({
         url: '/api/createNewChatContents',
+        method: 'post',
+        data: params
+    })
+}
+export const sendMoreChatContents = (params) => {
+    return request({
+        url: '/api/sendMoreChatContents',
         method: 'post',
         data: params
     })
@@ -136,6 +171,13 @@ export const addUserCommodityStatusImg = (params) => {
 export const getAllUserCommodityStatus = (params) => {
     return request({
         url: '/api/getAllUserCommodityStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const getTypesCommodityStatus = (params) => {
+    return request({
+        url: '/api/getTypesCommodityStatus',
         method: 'post',
         data: params
     })
