@@ -38,7 +38,12 @@
                 <ul>
                     <li v-for="item in chatContentsList" :key="item.cid" :class="[ item.sendId === $store.getters.uid ? 'chat-right' : 'chat-left' ,'chat-content']">
                         <el-avatar class="user-img img-left" v-if="item.sendId !== $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
-                        <span class="content-text">{{item.chatContents}}</span>
+                        <div v-if="item.chatImage"  class="img-box">
+                            <div>
+                                <el-image class="commodity-img" :src="item.chatImage" :preview-src-list="[item.chatImage]" alt=""/>
+                            </div>
+                        </div>
+                        <span v-else class="content-text">{{item.chatContents}}</span>
                         <el-avatar class="user-img img-right" v-if="item.sendId === $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
                     </li>
                 </ul>
@@ -52,12 +57,25 @@
                     show-word-limit
                 >
                 </el-input>
+                <el-upload
+                    action="http://localhost:3000/addChatPhoto"
+                    ref="upload"
+                    name="filechat"
+                    accept="jpg, png, jpeg"
+                    :show-file-list="false"
+                    :file-list="fileList"
+                    :on-change="handleChange"
+                    :on-success="handleAvatarSuccess"
+                    :auto-upload='false'>
+                    <i class="el-icon-picture"></i>
+                </el-upload>
                 <el-button class="btn" size="mini" type="primary" round @click="sendMessage">发送</el-button>
             </div>
         </div>
     </div>
 </template>
 <script>
+const fileTypes = ['image/png','image/jpeg','image/jpg'];
 import {createNewChatContents,getChatList,getUserFriends,sendMoreChatContents} from '../api/communication';
 import { initWebsocket } from '../api/common';
 export default {
@@ -74,6 +92,7 @@ export default {
             checkAll: false,
             isIndeterminate: false,
             checkboxList: [],
+            fileList: [],
         }
     },
     created(){
@@ -157,7 +176,7 @@ export default {
         },
         sendMessage(){
             let _this = this;
-            if(this.sendText.length === 0){
+            if(this.sendText.trim().length === 0){
                 this.$message({
                     message: "发空的消息是没意思的哦~",
                     type: "error"
@@ -167,7 +186,8 @@ export default {
                 let message = {
                     sendId: this.sendId,
                     receptionId: this.receptionId,
-                    chatContents: this.sendText
+                    chatContents: this.sendText,
+                    chatImage: ''
                 };
                 createNewChatContents(message).then(()=>{
                     // this.$message({
@@ -191,6 +211,36 @@ export default {
         },
         checkboxChange(checkboxGroup){
             console.log('change', this.sendInfo,checkboxGroup);
+        },
+        handleChange(file){
+            if(!fileTypes.includes(file.raw.type)){
+                this.$message({
+                    type: 'warning',
+                    message: '图片仅支持png、jpg及jpeg格式!'
+                });
+            }else{
+                this.fileList.push(file);
+                this.$refs.upload.submit();
+            }
+        },
+        handleAvatarSuccess(res){
+            let _this = this;
+            let message = {
+                sendId: this.sendId,
+                receptionId: this.receptionId,
+                chatContents: this.sendText,
+                chatImage: res.imgName
+            };
+            createNewChatContents(message).then(()=>{
+                this.$message({
+                    message: "图片发送成功",
+                    type: "success"
+                });
+                console.log('this.fileList', this.fileList);
+                this.fileList = [];
+                this.updateChatListHandle();
+                _this.ws.send(JSON.stringify({type: 'chat',...message}));
+            })
         },
         sendMoreMessage(){
             if(!this.sendContents.trim()){
@@ -243,11 +293,16 @@ export default {
 .checkbox-box .el-checkbox .el-checkbox__inner{
     border-radius: 50%;
 }
+#send-text .el-icon-picture{
+    font-size: 27px;
+    line-height: 59px;
+    margin-left: 3px;
+}
 </style>
 <style lang="scss" scoped>
     #container{
         width: 100%;
-        height: 620px;
+        height: 680px;
         background-color: #fff;
         display: flex;
         margin-top: -20px;
@@ -312,15 +367,26 @@ export default {
                 }
             }
             #chat{
-                height: 500px;
+                height: 559px;
                 overflow-y: scroll;
                 padding: 10px 30px 0;
+                border-left: 1px solid #eee;
                 ul{
                     overflow: hidden;
                 }
                 .chat-content{
                     margin-bottom: 10px;
                     clear: both;
+                    .img-box{
+                        display: inline-block;
+                        width: 180px;
+                        vertical-align: top;
+                        overflow: hidden;
+                        .commodity-img{
+                            width: 100%;
+                            height: 100%;
+                        }
+                    }
                     .content-text{
                         display: inline-block;
                         height: 40px;

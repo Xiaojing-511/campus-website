@@ -5,6 +5,7 @@
     </info-dialog>
     <span class="status-info-user" >{{item.uid}}</span>
     <div class="status-content">
+        <p class="topic" v-if="item.type === '#话题讨论'">{{item.type}}</p>
         <p class="status-contents">{{item.contents}}</p>
         <div class="img-box" v-for="(itemImg,index) in item.image" :key="index" >
             <div>
@@ -12,7 +13,7 @@
             </div>
         </div>
         <div>
-            <el-tag>{{item.type}}</el-tag>
+            <el-tag size="medium">{{item.type}}</el-tag>
         </div>
         <p>
             <span class="status-info-time">{{item.createTime}}</span>
@@ -152,6 +153,10 @@ export default {
 }
 .status-content{
     margin-left: 10px;
+    .topic{
+        color: #409EFF;
+        font-size: 14px;
+    }
     .status-contents{
         color: #181818;
         margin-bottom: 5px;

@@ -204,7 +204,7 @@ export default {
             if (res.data.pwdIsTrue) {
               window.localStorage.setItem('uid',this.loginForm.id)
               this.$store.dispatch("setUid", this.loginForm.id);
-              this.$router.push(`/main/home`);
+              this.$router.push(`/main/status`);
             } else {
               this.$message({
                 message: "密码错误，请重试！",

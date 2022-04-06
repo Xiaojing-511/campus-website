@@ -12,7 +12,7 @@
                 </div>
             </div>
             <div>
-                <el-tag>{{item.type}}</el-tag>
+                <el-tag size="middle">{{item.type}}</el-tag>
             </div>
             <p>
                 <span class="status-info-time">{{item.createTime}}</span>
@@ -225,7 +225,6 @@ export default {
         .commodity-img{
             width: 100%;
             height: 100%;
-            // margin: 10px 10px 0px 0px;
         }
     }
     .commodity-operation{
