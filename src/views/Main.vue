@@ -1,9 +1,26 @@
 <template>
     <div id="container">
-        <el-dropdown id="u-avatar" @command="logout">
+        <info-dialog style="position:absolute" :userId="userId"><span id="clickSpan"></span></info-dialog>
+        <el-dialog
+            id="addDialog"
+            title="添加好友"
+            :visible.sync="dialogVisible"
+            width="45%"
+        >
+            <el-input
+                id="input"
+                placeholder="请输入好友账户名"
+                v-model="inputModel"
+                clearable>
+            </el-input>
+            <i class="el-icon-search" @click="search"></i>
+        </el-dialog>
+
+        <el-dropdown id="u-avatar" @command="commandHandle">
             <el-avatar class="el-dropdown-link" :src="uImgSrc"></el-avatar>
             <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="user" disabled >{{uid}}</el-dropdown-item>
+                <el-dropdown-item command="add-friend" divided >添加好友</el-dropdown-item>
                 <el-dropdown-item command="out" divided>退出登陆</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown>
@@ -16,13 +33,17 @@
     </div>
 </template>
 <script>
-import Nav from '../components/Nav'
-import {getUserInfo} from '../api/communication'
+import Nav from '../components/Nav';
+import InfoDialog from '../components/InfoDialog.vue';
+import {getUserInfo,searchUser} from '../api/communication'
 export default {
     name: 'Main',
     data() {
         return {
             uid: window.localStorage.getItem('uid'),
+            dialogVisible: false,
+            inputModel: '',
+            userId: ''
         }
     },
     computed:{
@@ -31,7 +52,7 @@ export default {
         }
     },
     components:{
-        Nav
+        Nav,InfoDialog
     },
     created(){
         getUserInfo({uid: this.uid}).then(res=>{
@@ -40,15 +61,59 @@ export default {
         })
     },
     methods:{
-        logout(item){
+        commandHandle(item){
             if(item === 'out'){
                 window.localStorage.setItem('uid','');
                 this.$router.push('/login');
+            }else if(item === 'add-friend'){
+                this.dialogVisible = !this.dialogVisible
+            }
+        },
+        search(){
+            let inputModel = this.inputModel.trim();
+            if(inputModel){
+                searchUser({uid: inputModel}).then(res=>{
+                    if(res.status === 200){
+                        if(res.data.isHave){
+                            this.userId = inputModel;
+                            this.inputModel = '';
+                            this.$nextTick(()=>{
+                                document.getElementById('clickSpan').click();
+                            })
+                        }else{
+                            this.$message({
+                                message: '搜索无结果！',
+                                type: 'warning'
+                            });
+                        }
+                    }
+                    
+                })
+            }else{
+                this.inputModel = '';
             }
         }
     }
 }
 </script>
+<style lang="scss">
+#container #addDialog {
+    .el-input{
+        width: 200px;
+        margin-right: 5px;
+    }
+    .el-icon-search{
+        font-size: 20px;
+        vertical-align: middle;
+        cursor: pointer;
+        &:hover{
+            color: #409EFF;
+            font-size: 22px;
+
+        }
+    }
+}
+</style>
 <style lang="scss" scoped>
 #container{
     position: relative;

@@ -149,7 +149,6 @@ export default {
         getUserInfo({uid: this.uid}).then(res=>{
             this.info = res.data.info;
             this.styleText = this.info.styleText;
-            console.log('info',this.info);
         })
     },
     mounted(){
@@ -190,12 +189,10 @@ export default {
             getUserCommodityStatus({
                 uid: this.uid
             }).then(res=>{
-                console.log();
                 this.commodityList = res.data;
             })
         },
-        handleAvatarSuccess(res,file){
-            console.log('file',file);
+        handleAvatarSuccess(res){
             updateAccountImg({
                 uid: this.uid,
                 uImageSrc: res.imgName

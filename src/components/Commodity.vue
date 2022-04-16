@@ -82,6 +82,7 @@
 </template>
 <script>
 const notSelected = 'info',selected = '';
+const fileTypes = ['image/png','image/jpeg','image/jpg'];
 import {
     createUserCommodityStatus,
     addUserCommodityStatusImg,
@@ -129,8 +130,16 @@ export default {
             });
         },
         // 文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
-        handleChange(file, fileList) {
-            this.fileList = fileList;
+        handleChange(file) {
+            if(!fileTypes.includes(file.raw.type)){
+                this.$message({
+                    type: 'warning',
+                    message: '图片仅支持png、jpg及jpeg格式!'
+                });
+                this.fileList = [...this.fileList];
+            }else{
+                this.fileList.push(file);
+            }
         },
         async submitForm(){
             let commodityStatusInfo = {
@@ -286,7 +295,7 @@ article {
     border-radius: 10px;
     margin-bottom: 40px;
     font-size: 19px;
-    line-height: 1.6em;
+    // line-height: 1.6em;
     padding: 10px;
 }
 

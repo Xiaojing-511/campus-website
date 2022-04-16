@@ -1,10 +1,10 @@
 <template>
     <div id="container">
         <el-dialog
-        title="群发公告"
-        :visible.sync="sendMoreDialogVisible"
-        width="40%"
-        >
+            title="群发消息"
+            :visible.sync="sendMoreDialogVisible"
+            width="40%"
+            >
             <el-input
                 type="textarea"
                 placeholder="请输入消息内容"
@@ -17,12 +17,13 @@
             <p style="margin: 10px 0">发送给:</p>
             <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
             <div class="checkbox-box">
-                <el-checkbox-group v-model="sendUsers" @change="checkboxChange">
+                <el-checkbox-group v-model="sendUsers" >
                     <el-checkbox :label="item" v-for="item in checkboxList" :key="item"></el-checkbox>
                 </el-checkbox-group>
             </div>
             <el-button type="primary" size="small" @click="sendMoreMessage">群发消息</el-button>
         </el-dialog>
+        <info-dialog style="position:absolute" :userId="userId" :updateList="getUserFriends"><span id="clickSpan1"></span></info-dialog>
         <div id="side">
             <el-button class="more-send-btn" type="primary" size="small" round @click="clickSendMore">群发消息</el-button>
             <ul ref="chatList">
@@ -32,19 +33,23 @@
         
         <div id="content">
             <div id="user-info">
-                <p class="user-name">{{receptionId}}</p>
+                <p class="user-name" @click="showInfoDialog(receptionId)">{{receptionId}}</p>
             </div>
             <div id="chat" ref="chat">
                 <ul>
                     <li v-for="item in chatContentsList" :key="item.cid" :class="[ item.sendId === $store.getters.uid ? 'chat-right' : 'chat-left' ,'chat-content']">
-                        <el-avatar class="user-img img-left" v-if="item.sendId !== $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
+                        <span @click="showInfoDialog(item.sendId)" >
+                            <el-avatar class="user-img img-left" v-if="item.sendId !== $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
+                        </span>
                         <div v-if="item.chatImage"  class="img-box">
                             <div>
                                 <el-image class="commodity-img" :src="item.chatImage" :preview-src-list="[item.chatImage]" alt=""/>
                             </div>
                         </div>
                         <span v-else class="content-text">{{item.chatContents}}</span>
-                        <el-avatar class="user-img img-right" v-if="item.sendId === $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
+                        <span @click="showInfoDialog(item.sendId)" >
+                            <el-avatar class="user-img img-right" v-if="item.sendId === $store.getters.uid" :src="item.uImageSrc" alt="111"></el-avatar>
+                        </span>
                     </li>
                 </ul>
             </div>
@@ -76,9 +81,12 @@
 </template>
 <script>
 const fileTypes = ['image/png','image/jpeg','image/jpg'];
-import {createNewChatContents,getChatList,getUserFriends,sendMoreChatContents} from '../api/communication';
+import InfoDialog from './InfoDialog.vue';
+import {createNewChatContents,getChatList,getUserFriends,sendMoreChatContents,judgeUserIsFriend} from '../api/communication';
 import { initWebsocket } from '../api/common';
 export default {
+    name: 'Chat',
+    components:{InfoDialog},
     data() {
         return {
             sendId: '',
@@ -93,6 +101,7 @@ export default {
             isIndeterminate: false,
             checkboxList: [],
             fileList: [],
+            userId: ''
         }
     },
     created(){
@@ -101,22 +110,7 @@ export default {
     async mounted(){
         this.sendId = this.$store.getters.uid;
         this.initWebsocket();     
-        await getUserFriends({uid: this.sendId}).then(res=>{
-            this.chatUserList = res.data;
-            console.log(this.chatUserList);
-        });
-        if(this.chatUserList.length){
-            this.receptionId = this.chatUserList[0].ufriendId;
-            const oLis = this.$refs.chatList.getElementsByTagName('li');
-            oLis[0].classList.add('active');
-            await getChatList({
-                    sendId: this.sendId,
-                    receptionId: this.receptionId
-                }).then(res=>{
-                    this.chatContentsList = res.data
-                });
-            this.addLiClick();
-        }
+        this.getUserFriends();
     },
     beforeDestroy(){
         this.ws.close();
@@ -127,6 +121,9 @@ export default {
             initWebsocket(_this);
             this.ws.onmessage = function (event) {
                 let {sendId,receptionId} = JSON.parse(event.data);
+                if(Array.isArray(receptionId) && receptionId.includes(_this.sendId)){    
+                    receptionId = _this.sendId;
+                }
                 if(_this.sendId == receptionId && _this.receptionId == sendId){
                     _this.updateChatListHandle();
                 }else if(_this.sendId == receptionId && _this.receptionId !== sendId){
@@ -137,6 +134,7 @@ export default {
                         }
                     }
                 }
+            
             }
         },
         async addLiClick(){
@@ -154,13 +152,23 @@ export default {
                     this.updateChatListHandle();
                 }
             }
-            console.log('click');
         },
-        getUserFriends(){
-            getUserFriends({uid: this.sendId}).then(res=>{
+        async getUserFriends(){
+            await getUserFriends({uid: this.sendId}).then(res=>{
                 this.chatUserList = res.data;
+            });
+            if(this.chatUserList.length){
                 this.receptionId = this.chatUserList[0].ufriendId;
-            })
+                const oLis = this.$refs.chatList.getElementsByTagName('li');
+                oLis[0].classList.add('active');
+                await getChatList({
+                        sendId: this.sendId,
+                        receptionId: this.receptionId
+                    }).then(res=>{
+                        this.chatContentsList = res.data
+                    });
+                this.addLiClick();
+            }
         },
         updateChatListHandle(){
             getChatList({
@@ -168,13 +176,12 @@ export default {
                 receptionId: this.receptionId
             }).then(res=>{
                 this.chatContentsList = res.data
-                console.log('chatcontent...', this.chatContentsList);
                 this.$nextTick(()=>{
                     this.$refs.chat.scrollTop = this.$refs.chat.scrollHeight;
                 })
             })
         },
-        sendMessage(){
+        async sendMessage(){
             let _this = this;
             if(this.sendText.trim().length === 0){
                 this.$message({
@@ -183,20 +190,30 @@ export default {
                 });
                 this.sendText = ''
             }else{
-                let message = {
-                    sendId: this.sendId,
-                    receptionId: this.receptionId,
-                    chatContents: this.sendText,
-                    chatImage: ''
-                };
-                createNewChatContents(message).then(()=>{
-                    // this.$message({
-                    //     message: "消息发送成功",
-                    //     type: "success"
-                    // });
-                    this.sendText = ''
-                    this.updateChatListHandle();
-                    _this.ws.send(JSON.stringify({type: 'chat',...message}));
+                await judgeUserIsFriend({
+                    uid: this.sendId,
+                    ufriendId: this.receptionId
+                }).then(res=>{
+                    if(res.data.isFriend){
+                        let message = {
+                            sendId: this.sendId,
+                            receptionId: this.receptionId,
+                            chatContents: this.sendText,
+                            chatImage: ''
+                        };
+                        createNewChatContents(message).then(()=>{
+                            // this.$message({
+                            //     message: "消息发送成功",
+                            //     type: "success"
+                            // });
+                            this.sendText = ''
+                            this.updateChatListHandle();
+                            _this.ws.send(JSON.stringify({type: 'chat',...message}));
+                        })
+                    }else{
+                        this.$message.warning('你们还不是好友哦～');
+                        this.getUserFriends();
+                    }
                 })
             }
         },
@@ -207,10 +224,6 @@ export default {
                 list.push(item.ufriendId);
             })
             this.checkboxList = list;
-            console.log('this.checkboxList',this.checkboxList);
-        },
-        checkboxChange(checkboxGroup){
-            console.log('change', this.sendInfo,checkboxGroup);
         },
         handleChange(file){
             if(!fileTypes.includes(file.raw.type)){
@@ -236,13 +249,13 @@ export default {
                     message: "图片发送成功",
                     type: "success"
                 });
-                console.log('this.fileList', this.fileList);
                 this.fileList = [];
                 this.updateChatListHandle();
                 _this.ws.send(JSON.stringify({type: 'chat',...message}));
             })
         },
         sendMoreMessage(){
+            let _this = this;
             if(!this.sendContents.trim()){
                 this.$message({
                     type: 'warning',
@@ -254,11 +267,13 @@ export default {
                     message: '未选择群发用户！'
                 })
             }else{
-                sendMoreChatContents({
+                let message = {
                     sendId: this.sendId,
                     receptionIds: this.sendUsers,
-                    chatContents: this.sendContents
-                }).then(res=>{
+                    chatContents: this.sendContents,
+                    chatImage: ''
+                }
+                sendMoreChatContents(message).then(res=>{
                     if(res.status === 200){
                         this.$message({
                             type: 'success',
@@ -268,17 +283,21 @@ export default {
                         this.sendUsers = [];
                         this.sendContents = '';
                         this.updateChatListHandle();
+                        _this.ws.send(JSON.stringify({type: 'chat',...message}));
                     }
                 })
-                console.log('send...',this.sendUsers,this.sendContents );
             }
         },
         handleCheckAllChange(val) {
             this.sendUsers = val ? this.checkboxList : [];
             this.isIndeterminate = false;
         },
-
-
+        showInfoDialog(userId){
+            this.userId = userId;
+            this.$nextTick(()=>{
+                document.getElementById('clickSpan1').click();
+            })
+        }
     }
 }
 </script>
@@ -361,6 +380,7 @@ export default {
                 border-bottom: 1px solid #eee;
                 border-left: 1px solid #eee;
                 .user-name{
+                    cursor: pointer;
                     height: 60px;
                     line-height: 60px;
                     margin-left: 30px;
@@ -396,6 +416,7 @@ export default {
                     }
                     .user-img{
                         margin-bottom: -12px;
+                        cursor: pointer;
                     }
                     .img-left{
                         margin-right: 10px;

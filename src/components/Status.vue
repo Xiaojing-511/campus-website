@@ -83,6 +83,7 @@
 <script>
 // import { judgeEmptyStr } from '@/api/common';
 const notSelected = 'info',selected = '';
+const fileTypes = ['image/png','image/jpeg','image/jpg'];
 import StatusCard from './StatusCard.vue';
 import { createUserStatus,getAllUserStatus,addUserStatusImg,getStatusTagTypes,getTypesStatus } from '@/api/communication'
 export default {
@@ -143,8 +144,16 @@ export default {
                 })
             }
         },
-        handleChange(file, fileList) {
-            this.fileList = fileList;
+        handleChange(file) {
+            if(!fileTypes.includes(file.raw.type)){
+                this.$message({
+                    type: 'warning',
+                    message: '图片仅支持png、jpg及jpeg格式!'
+                });
+                this.fileList = [...this.fileList];
+            }else{
+                this.fileList.push(file);
+            }
         },
         async submitForm(){
             let statusInfo = {

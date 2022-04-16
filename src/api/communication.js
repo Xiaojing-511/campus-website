@@ -28,6 +28,14 @@ export const juageUserIdOnly = (params) => {
         data: params
     })
 }
+export const searchUser = (params) => {
+    return request({
+        url: '/api/searchUser',
+        method: 'post',
+        data: params
+    })
+}
+
 export const updateAccountImg = (params) => {
     return request({
         url: '/api/updateAccountImg',
@@ -143,6 +151,13 @@ export const getUserFriends = (params) => {
 export const judgeUserIsFriend = (params) => {
     return request({
         url: '/api/judgeIsFriend',
+        method: 'post',
+        data: params
+    })
+}
+export const deleteFriend = (params) => {
+    return request({
+        url: '/api/deleteFriend',
         method: 'post',
         data: params
     })
