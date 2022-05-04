@@ -17,7 +17,7 @@
         </div>
         <p>
             <span class="status-info-time">{{item.createTime}}</span>
-            <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid">删除</span>
+            <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid || utype === 'manager'">删除</span>
             <el-dialog
                 title="提示"
                 :visible.sync="deleteDialogVisible"
@@ -84,7 +84,7 @@ export default {
             commentsList: [],
         }
     },
-    props:['item'],
+    props:['item',"utype"],
     created(){
         this.getStatusComment();
         document.addEventListener('click', this.listenerHandle,true)
@@ -98,7 +98,7 @@ export default {
                 sid: this.item.sid
             }).then(res=>{
                 this.commentsList = res.data;
-            })
+            }).catch(err=>console.log(err));
         },
         deleteStatus(sid){
             console.log('sid',sid);
@@ -135,7 +135,7 @@ export default {
                 }else{
                     console.log(res);
                 }
-            })
+            }).catch(err=>console.log(err));
         }
     }
 }

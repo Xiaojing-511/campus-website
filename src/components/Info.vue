@@ -149,7 +149,7 @@ export default {
         getUserInfo({uid: this.uid}).then(res=>{
             this.info = res.data.info;
             this.styleText = this.info.styleText;
-        })
+        }).catch(err=>console.log(err));
     },
     mounted(){
         this.initTabClick();
@@ -183,14 +183,14 @@ export default {
                 uid: this.uid
             }).then(res=>{
                 this.statusList = res.data;
-            })
+            }).catch(err=>console.log(err));
         },
         updateCommodityList(){
             getUserCommodityStatus({
                 uid: this.uid
             }).then(res=>{
                 this.commodityList = res.data;
-            })
+            }).catch(err=>console.log(err));
         },
         handleAvatarSuccess(res){
             updateAccountImg({
@@ -199,7 +199,7 @@ export default {
             }).then(res=>{
                 this.$store.dispatch('setUImgSrc',res.data.info.uImageSrc);
                 this.$refs.upload.clearFiles();
-            })
+            }).catch(err=>console.log(err));
         },
         editInfo(){
             this.editing = !this.editing;
@@ -232,7 +232,7 @@ export default {
                 this.styleText = this.info.styleText;
                 this.$store.dispatch('setUStyleText',this.styleText);
                 this.editing = !this.editing;
-            })
+            }).catch(err=>console.log(err));
         }
     }
 }

@@ -28,7 +28,7 @@
                 </el-tag>
             </div>
             <el-upload
-                action="http://localhost:3000/addCommodityPhoto"
+                action="/api/addCommodityPhoto"
                 list-type="picture-card"
                 ref="upload"
                 name="filecommodity"
@@ -74,7 +74,7 @@
         </div>
     </div>
     <article v-for="(item) in commodityList" :key="item.cid">
-        <commodity-card :item="item"></commodity-card>
+        <commodity-card :item="item" :utype="utype"></commodity-card>
     </article>
     <p v-if="!commodityList.length" style="color: #aaa;font-size:14px">没有啦...做第一个发布者吧！</p>
     <p v-else style="color: #aaa;font-size:14px">到底啦...</p>
@@ -89,6 +89,7 @@ import {
     getAllUserCommodityStatus,
     getTypesCommodityStatus,
     getCommodityTagTypes,
+    getUserInfo
 } from '../api/communication'
 import CommodityCard from './CommodityCard.vue';
 export default {
@@ -96,6 +97,7 @@ export default {
     data(){
         return {
             uid: window.localStorage.getItem('uid'),
+            utype: '',
             dialogVisible: false,
             publishContent: '',
             cid: '',
@@ -111,6 +113,7 @@ export default {
     async created(){
         await this.getTagTypes();
         await this.updateCommodityList();
+        await this.getUserType();
     },
     methods: {
         async updateCommodityList(){
@@ -123,6 +126,9 @@ export default {
                     this.commodityList = res.data;
                 })
             }
+        },
+        async getUserType(){
+            getUserInfo({uid:this.uid}).then(res=>this.utype = res.data.info.utype)
         },
         handleRemove(file) {
             this.fileList = this.fileList.filter((item)=>{
@@ -137,7 +143,7 @@ export default {
                     message: '图片仅支持png、jpg及jpeg格式!'
                 });
                 this.fileList = [...this.fileList];
-            }else{
+            }else if(!this.fileList.includes(file)){
                 this.fileList.push(file);
             }
         },
@@ -176,7 +182,7 @@ export default {
                         this.$message.success('发布成功！');
                         this.updateCommodityList();
                     }
-                }) 
+                }).catch(err=>console.log(err));
             }           
         },
         async getTagTypes(){

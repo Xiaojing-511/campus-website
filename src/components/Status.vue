@@ -28,7 +28,7 @@
                 </el-tag>
             </div>
             <el-upload
-                action="http://localhost:3000/addStatusPhoto"
+                action="/api/addStatusPhoto"
                 list-type="picture-card"
                 ref="upload"
                 name="filestatus"
@@ -74,7 +74,7 @@
         </div>
     </div>
     <article v-for="(item) in statusList" :key="item.sid">
-        <status-card :item = "item"></status-card>
+        <status-card :item="item" :utype="utype"></status-card>
     </article>
     <p v-if="!statusList.length" style="color: #aaa;font-size:14px">没有啦...做第一个发布者吧！</p>
     <p v-else style="color: #aaa;font-size:14px">到底啦...</p>
@@ -85,12 +85,13 @@
 const notSelected = 'info',selected = '';
 const fileTypes = ['image/png','image/jpeg','image/jpg'];
 import StatusCard from './StatusCard.vue';
-import { createUserStatus,getAllUserStatus,addUserStatusImg,getStatusTagTypes,getTypesStatus } from '@/api/communication'
+import { createUserStatus,getAllUserStatus,addUserStatusImg,getStatusTagTypes,getTypesStatus,getUserInfo } from '@/api/communication'
 export default {
     components:{StatusCard},
     data() {
         return {
             uid: window.localStorage.getItem('uid'),
+            utype: '',
             statusList: [],
             newText: '',
             isWriting: false,
@@ -109,6 +110,7 @@ export default {
     async created(){
         await this.getStatusTypes();
         await this.getStatus();
+        await this.getUserType();
     },
     mounted(){
     },
@@ -131,7 +133,7 @@ export default {
                 this.allTypeTags = allTypes;
                 this.selectTag = '其他';
                 this.selectCheckTags = ['全部'];
-            })
+            }).catch(err=>console.log(err))
         },
         async getStatus(){
             if(this.selectCheckTags.includes('全部')){
@@ -141,8 +143,16 @@ export default {
             }else{
                 getTypesStatus({statusTypes: this.selectCheckTags}).then(res=>{
                     this.statusList = res.data;
-                })
+                }).catch(err=>console.log(err))
             }
+        },
+        async getUserType(){
+            getUserInfo({uid:this.uid}).then(res=>this.utype = res.data.info.utype)
+        },
+        handleRemove(file) {
+            this.fileList = this.fileList.filter((item)=>{
+                return item.uid !== file.uid
+            });
         },
         handleChange(file) {
             if(!fileTypes.includes(file.raw.type)){
@@ -151,7 +161,7 @@ export default {
                     message: '图片仅支持png、jpg及jpeg格式!'
                 });
                 this.fileList = [...this.fileList];
-            }else{
+            }else if(!this.fileList.includes(file)){
                 this.fileList.push(file);
             }
         },
@@ -172,7 +182,7 @@ export default {
                     this.$message.success('发布成功！');
                     this.getStatus();
                 }
-            })
+            }).catch(err=>console.log(err))
         },
         handleAvatarSuccess(res){
             this.statusImageArr.push(res.imgName);
@@ -191,7 +201,7 @@ export default {
                         this.$message.success('发布成功！');
                         this.getStatus();
                     }
-                }) 
+                }).catch(err=>console.log(err))
             }           
         },
         tagClick(item,index){

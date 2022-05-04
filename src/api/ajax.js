@@ -1,4 +1,6 @@
 import axios from "axios";
+import Router from '../router';
+import { Message } from 'element-ui';
 // 普通接口
 const request = axios.create({
     baseURL: '',
@@ -10,6 +12,8 @@ const request = axios.create({
   })
   request.interceptors.request.use(
     (config) => {
+      // 在请求头中添加token
+      config.headers.Authorization = window.localStorage.getItem("token")
       return config
     },
     (error) => {
@@ -21,6 +25,13 @@ const request = axios.create({
     (response) => {
       if (response.data.status === 200) {
         return Promise.resolve(response.data)
+      }
+      else if(response.data.status === 50014){
+        window.localStorage.removeItem('uid');
+        window.localStorage.removeItem('token');
+        Message({type: 'warning', message:'登陆过期！请重新登陆'})
+        Router.push('/login');
+        return Promise.reject(response.data)
       }
     },
     (error) => {

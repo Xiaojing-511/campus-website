@@ -16,7 +16,7 @@
             </div>
             <p>
                 <span class="status-info-time">{{item.createTime}}</span>
-                <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid">删除</span>
+                <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid || utype === 'manager'">删除</span>
                 <el-dialog
                     title="提示"
                     :visible.sync="deleteDialogVisible"
@@ -93,9 +93,10 @@ export default {
             deleteDialogVisible: false
       }  
     },
-    props:['item'],
+    props:['item','utype'],
     created(){
         this.getCommodityComment();
+        console.log('item',this.item);
         document.addEventListener('click', this.listenerHandle,true)
     },
     mounted(){
@@ -114,7 +115,7 @@ export default {
                     this.$message.success('添加好友成功，快去聊天吧～');
                     this.isFriend = true;
                 }
-            })
+            }).catch(err=>console.log(err));
         },
         async showInfo(item){
             this.info.uid = item.uid;
@@ -124,11 +125,11 @@ export default {
                 ufriendId: this.info.uid
             }).then(res=>{
                 this.isFriend = res.data.isFriend
-            })
+            }).catch(err=>console.log(err));
             await getUserInfo({uid: item.uid}).then(res=>{
                 this.info.uid = res.data.info.uid;
                 this.info.styleText = res.data.info.styleText;
-            })
+            }).catch(err=>console.log(err));
             this.dialogVisibleInfo = true;
         },
         deleteStatus(cid){
@@ -141,7 +142,7 @@ export default {
                     this.deleteDialogVisible = false;
                     this.$parent.updateCommodityList();
                 }
-            })
+            }).catch(err=>console.log(err));
         },
         listenerHandle(e){
             this.$refs.commentInput && this.commentInput && !this.$refs.commentInput.contains(e.target) ? 
@@ -156,7 +157,7 @@ export default {
                 cid: this.item.cid
             }).then(res=>{
                 this.commentsList = res.data;
-            })
+            }).catch(err=>console.log(err));
         },
         sendComment(){
             addCommodityComment({
@@ -171,7 +172,7 @@ export default {
                 }else{
                     console.log(res);
                 }
-            })
+            }).catch(err=>console.log(err));
         }
     }
 }

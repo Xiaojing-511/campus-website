@@ -5,9 +5,10 @@
         :visible.sync="dialogVisible"
         width="40%">
         <div class="info-container">
-            <div v-show="!(uid == info.uid || info.uid == '官方小助手')">
+            <div v-show="!(uid == info.uid)">
                 <el-button v-show="!isFriend" @click="addFriend" class="add-btn" type="primary" round>加好友</el-button>
-                <el-button v-show="isFriend" @click="deleteDialogVisible = !deleteDialogVisible" class="add-btn" type="danger" round>删除好友</el-button>
+                <el-button v-show="utype === 'manager'" @click="cancelDialogVisible = !cancelDialogVisible" class="add-btn" type="danger" round>注销用户</el-button>
+                <el-button v-show="utype !== 'manager' && isFriend" @click="deleteDialogVisible = !deleteDialogVisible" class="add-btn" type="danger" round>删除好友</el-button>
             </div>
             <el-avatar class="el-dropdown-link" :src="info.uImageSrc"></el-avatar>
             <p class="info"><span>用户名:</span>{{info.uid}}</p>
@@ -28,6 +29,17 @@
             <el-button type="danger" @click="deleteFriend">删 除</el-button>
         </span>
     </el-dialog>
+    <el-dialog
+        title="提示"
+        :visible.sync="cancelDialogVisible"
+        width="30%"
+        center>
+        <span>确认要注销该用户吗？删除后不可恢复</span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="cancelDialogVisible = false">取 消</el-button>
+            <el-button type="danger" @click="deleteUser">删 除</el-button>
+        </span>
+    </el-dialog>
     <span @click="showInfo(userId)">
         <slot></slot>
     </span>
@@ -39,13 +51,18 @@ export default {
     data(){
         return {
             uid: window.localStorage.getItem('uid'),
+            utype: '',
             info: {},
             dialogVisible: false,
             isFriend: false,
             deleteDialogVisible: false,
+            cancelDialogVisible: false
         }
     },
     props:['userId','updateList'],
+    created(){
+        getUserInfo({uid: this.uid}).then(res=>this.utype = res.data.info.utype)
+    },
     methods:{
         async showInfo(userId){
             // 判断是否互为好友
@@ -54,10 +71,10 @@ export default {
                 ufriendId: userId
             }).then(res=>{
                 this.isFriend = res.data.isFriend
-            })
+            }).catch(err=>console.log(err));
             await getUserInfo({uid: userId}).then(res=>{
                 this.info = {...res.data.info};
-            })
+            }).catch(err=>console.log(err));
             this.dialogVisible = true;
         },
         addFriend(){
@@ -70,7 +87,7 @@ export default {
                     this.isFriend = true;
 
                 }
-            })
+            }).catch(err=>console.log(err));
         },
         deleteFriend(){
             deleteFriend({
@@ -86,8 +103,10 @@ export default {
                     this.dialogVisible = !this.dialogVisible;
                     this.updateList ? this.updateList() : '';
                 }
-            })
-
+            }).catch(err=>console.log(err));
+        },
+        deleteUser(){
+            console.log('注销用户', this.info);
         }
     }
 }

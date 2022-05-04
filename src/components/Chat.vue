@@ -156,7 +156,7 @@ export default {
         async getUserFriends(){
             await getUserFriends({uid: this.sendId}).then(res=>{
                 this.chatUserList = res.data;
-            });
+            }).catch(err=>console.log(err));
             if(this.chatUserList.length){
                 this.receptionId = this.chatUserList[0].ufriendId;
                 const oLis = this.$refs.chatList.getElementsByTagName('li');
@@ -166,7 +166,7 @@ export default {
                         receptionId: this.receptionId
                     }).then(res=>{
                         this.chatContentsList = res.data
-                    });
+                    }).catch(err=>console.log(err));
                 this.addLiClick();
             }
         },
@@ -179,7 +179,7 @@ export default {
                 this.$nextTick(()=>{
                     this.$refs.chat.scrollTop = this.$refs.chat.scrollHeight;
                 })
-            })
+            }).catch(err=>console.log(err));
         },
         async sendMessage(){
             let _this = this;
@@ -209,12 +209,12 @@ export default {
                             this.sendText = ''
                             this.updateChatListHandle();
                             _this.ws.send(JSON.stringify({type: 'chat',...message}));
-                        })
+                        }).catch(err=>console.log(err));
                     }else{
                         this.$message.warning('你们还不是好友哦～');
                         this.getUserFriends();
                     }
-                })
+                }).catch(err=>console.log(err));
             }
         },
         clickSendMore(){
@@ -252,7 +252,7 @@ export default {
                 this.fileList = [];
                 this.updateChatListHandle();
                 _this.ws.send(JSON.stringify({type: 'chat',...message}));
-            })
+            }).catch(err=>console.log(err));
         },
         sendMoreMessage(){
             let _this = this;
@@ -285,7 +285,7 @@ export default {
                         this.updateChatListHandle();
                         _this.ws.send(JSON.stringify({type: 'chat',...message}));
                     }
-                })
+                }).catch(err=>console.log(err));
             }
         },
         handleCheckAllChange(val) {

@@ -58,12 +58,13 @@ export default {
         getUserInfo({uid: this.uid}).then(res=>{
             this.$store.dispatch('setUImgSrc',res.data.info.uImageSrc);
             this.$store.dispatch('setUStyleText',res.data.info.styleText);
-        })
+        }).catch(err=>console.log(err))
     },
     methods:{
         commandHandle(item){
             if(item === 'out'){
-                window.localStorage.setItem('uid','');
+                window.localStorage.removeItem('uid');
+                window.localStorage.removeItem('token');
                 this.$router.push('/login');
             }else if(item === 'add-friend'){
                 this.dialogVisible = !this.dialogVisible
@@ -86,9 +87,8 @@ export default {
                                 type: 'warning'
                             });
                         }
-                    }
-                    
-                })
+                    } 
+                }).catch(err=>console.log(err))
             }else{
                 this.inputModel = '';
             }
