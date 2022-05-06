@@ -1,76 +1,77 @@
 <template>
-<div>
-    <info-dialog :userId="item.uid">
-        <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
-    </info-dialog>
-    <span class="status-info-user" >{{item.uid}}</span>
-    <div class="status-content">
-        <p class="topic" v-if="item.type === '#话题讨论'">{{item.type}}</p>
-        <p class="status-contents">{{item.contents}}</p>
-        <div class="img-box" v-for="(itemImg,index) in item.image" :key="index" >
+    <div>
+        <info-dialog :userId="item.uid">
+            <el-avatar class="el-dropdown-link status-avatar" :src="item.uImageSrc"></el-avatar>
+        </info-dialog>
+        <span class="status-info-user" >{{item.uid}}</span>
+        <div class="status-content">
+            <p class="topic" v-if="item.type === '#话题讨论'">{{item.type}}</p>
+            <p class="status-contents">{{item.contents}}</p>
+            <div class="img-box" v-for="(itemImg,index) in item.image" :key="index" >
+                <div>
+                    <el-image class="status-img" :src="itemImg" :preview-src-list="[itemImg]" alt=""/>
+                </div>
+            </div>
             <div>
-                <el-image class="status-img" :src="itemImg" :preview-src-list="[itemImg]" alt=""/>
+                <el-tag size="medium">{{item.type}}</el-tag>
             </div>
-        </div>
-        <div>
-            <el-tag size="medium">{{item.type}}</el-tag>
-        </div>
-        <p>
-            <span class="status-info-time">{{item.createTime}}</span>
-            <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid || utype === 'manager'">删除</span>
-            <el-dialog
-                title="提示"
-                :visible.sync="deleteDialogVisible"
-                width="30%"
-                center>
-                <span>确认要删除该条动态吗？删除后不可恢复</span>
-                <span slot="footer" class="dialog-footer">
-                    <el-button @click="deleteDialogVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="deleteStatus(item.sid)">确 定</el-button>
-                </span>
-            </el-dialog>
-        </p>
-        <div class="commodity-operation">
-            <div class="box" v-show="showDetail">
-                <div class="icon">
-                    <i class="iconfont icon-heart"></i>
-                    <span>赞</span>
-                </div>
-                <div class="icon" @click="commentHandle">
-                    <i class="el-icon-chat-square"></i>
-                    <span>评论</span>
-                </div>
-            </div>
-            <div class="i-box" @click="showDetail = !showDetail">
-                <i class="el-icon-more"></i>
-            </div>
-        </div>
-        <div class="comment-input" v-show="commentInput" ref="commentInput">
-            <el-input
-                id="commentInput"
-                type="textarea"
-                placeholder="评论点什么..."
-                v-model="commentContent"
-                :rows="2"
-                maxlength="50"
-                show-word-limit
-            >
-            </el-input>
-            <el-button :disabled="commentContent.length == 0" @click="sendComment">发送</el-button>
-        </div>
-        <div id="comments">
-            <p class="comment" v-for="item in commentsList" :key="item.ccid">
-                <info-dialog :userId="item.commentUser">
-                    <span class="user">{{item.commentUser}}</span>:
-                </info-dialog>
-                <span class="content">{{item.commentContent}}</span>
+            <p>
+                <span class="status-info-time">{{item.createTime}}</span>
+                <span class="delete" @click="deleteDialogVisible = true" v-if="uid == item.uid || utype === 'manager'">删除</span>
+                <el-dialog
+                    title="提示"
+                    :visible.sync="deleteDialogVisible"
+                    width="30%"
+                    center>
+                    <span>确认要删除该条动态吗？删除后不可恢复</span>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="deleteDialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="deleteStatus(item.sid)">确 定</el-button>
+                    </span>
+                </el-dialog>
             </p>
+            <div class="commodity-operation">
+                <div class="box" v-show="showDetail">
+                    <div class="icon">
+                        <i class="iconfont icon-heart"></i>
+                        <span>赞</span>
+                    </div>
+                    <div class="icon" @click="commentHandle">
+                        <i class="el-icon-chat-square comment"></i>
+                        <span>评论</span>
+                    </div>
+                </div>
+                <div class="i-box" @click="showDetail = !showDetail">
+                    <i class="el-icon-more"></i>
+                </div>
+            </div>
+            <div class="comment-input" v-show="commentInput" ref="commentInput">
+                <el-input
+                    id="commentInput"
+                    type="textarea"
+                    placeholder="评论点什么..."
+                    v-model="commentContent"
+                    :rows="2"
+                    maxlength="50"
+                    show-word-limit
+                >
+                </el-input>
+                <el-button :disabled="commentContent.length == 0" @click="sendComment">发送</el-button>
+            </div>
+            <div id="comments">
+                <p class="comment" v-for="item in commentsList" :key="item.ccid">
+                    <info-dialog :userId="item.commentUser">
+                        <span class="user">{{item.commentUser}}</span>:
+                    </info-dialog>
+                    <span class="content">{{item.commentContent}}</span>
+                    <span class="delete delete-btn" @click="deleteComment(item)" v-if="uid == item.commentUser || utype === 'manager'">删除</span>
+                </p>
+            </div>
         </div>
     </div>
-</div>
 </template>
 <script>
-import { deleteUserStatus,getStatusComment,addStatusComment } from '@/api/communication'
+import { deleteUserStatus,getStatusComment,addStatusComment,deleteStatusComment } from '@/api/communication'
 import InfoDialog from './InfoDialog.vue';
 export default {
     components:{InfoDialog},
@@ -113,6 +114,17 @@ export default {
                     this.$parent.getStatus();
                 }
             })
+        },
+        deleteComment(item){
+            deleteStatusComment({commentId: item.scid}).then(res=>{
+                if(res.status === 200){
+                    this.$message({type: 'success', message: '删除评论成功'});
+                    this.getStatusComment();
+                }else{
+                    console.log(res);
+                }
+            })
+            console.log('delete', item);
         },
         commentHandle(){
             this.commentInput = true;
@@ -182,6 +194,9 @@ export default {
         font-size: 12px;
         color: #576C95;
         cursor: pointer;
+        &:hover{
+            color: #EC3941;
+        }
     }
     .commodity-operation{
         position: relative;
@@ -205,11 +220,14 @@ export default {
                 text-align: center;
                 i{
                     font-size: 20px;
+                    vertical-align: bottom;
+                }
+                .comment{
+                    transform: translateY(-5px);
                 }
                 span{
                     margin-left: 2px;
                     font-size: 14px;
-                    vertical-align: top;
                 }
             }
         }
@@ -236,7 +254,10 @@ export default {
         font-size: 14px;
         background-color: #F7F7F8;
         .comment{
+            margin: 0;
+            // padding: 5px 0;
             border-bottom: 1px solid #EAEAEA;
+            position: relative;
             .user{
                 color: #576C95;
                 margin: 0 2px 0 10px;
@@ -244,6 +265,12 @@ export default {
             }
             .content{
                 color: #181818;
+            }
+            .delete-btn{
+                position: absolute;
+                right: 5px;
+                font-size: 12px;
+                transform: scale(0.9);
             }
         }
     }

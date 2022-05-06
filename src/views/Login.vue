@@ -64,7 +64,7 @@
   </div>
 </template>
 <script>
-import { getUserLogin,createAccount,juageUserIdOnly } from "@/api/communication";
+import { getUserLogin,createAccount,juageUserIdOnly,getUserInfo } from "@/api/communication";
 // import { judgeEmptyStr } from '@/api/common';
 export default {
   data() {
@@ -204,6 +204,10 @@ export default {
             console.log('res.data',res.data);
             if (res.data.pwdIsTrue) {
               window.localStorage.setItem('uid',this.loginForm.id);
+              window.localStorage.setItem('token',res.data.token)
+              getUserInfo({uid: this.uid}).then(res=>{
+                window.localStorage.setItem('utype',res.data.info.utype);
+              })
               window.localStorage.setItem('token',res.data.token)
               this.$store.dispatch("setUid", this.loginForm.id);
               this.$router.push(`/main/status`);

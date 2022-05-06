@@ -92,6 +92,7 @@ export const getStatusComment = (params) => {
         data: params
     })
 }
+
 export const addStatusComment = (params) => {
     return request({
         url: '/api/addStatusComment',
@@ -99,9 +100,23 @@ export const addStatusComment = (params) => {
         data: params
     })
 }
+export const deleteStatusComment = (params) => {
+    return request({
+        url: '/api/deleteStatusComment',
+        method: 'post',
+        data: params
+    })
+}
 export const deleteUserStatus = (params) => {
     return request({
         url: '/api/deleteUserStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const deleteUser = (params) => {
+    return request({
+        url: '/api/deleteUser',
         method: 'post',
         data: params
     })
@@ -207,6 +222,13 @@ export const getUserCommodityStatus = (params) => {
 export const deleteUserCommodityStatus = (params) => {
     return request({
         url: '/api/deleteUserCommodityStatus',
+        method: 'post',
+        data: params
+    })
+}
+export const deleteCommodityComment = (params) => {
+    return request({
+        url: '/api/deleteCommodityComment',
         method: 'post',
         data: params
     })

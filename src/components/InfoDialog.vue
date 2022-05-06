@@ -46,7 +46,7 @@
 </div>
 </template>
 <script>
-import {judgeUserIsFriend,getUserInfo,addFriend,deleteFriend } from '@/api/communication'
+import {judgeUserIsFriend,getUserInfo,addFriend,deleteFriend,deleteUser } from '@/api/communication'
 export default {
     data(){
         return {
@@ -107,6 +107,17 @@ export default {
         },
         deleteUser(){
             console.log('注销用户', this.info);
+            deleteUser({uid: this.info.uid}).then(res=>{
+                 if(res.status === 200){
+                    this.$message({
+                        type: 'success',
+                        message: '注销用户成功！'
+                    });
+                    this.cancelDialogVisible = !this.cancelDialogVisible;
+                    this.dialogVisible = !this.dialogVisible;
+                    this.updateList ? this.updateList() : '';
+                }
+            })
         }
     }
 }

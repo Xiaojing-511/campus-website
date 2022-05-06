@@ -5,7 +5,7 @@
         </info-dialog>
         <span class="status-info-user" >{{item.uid}}</span>
         <div class="status-content">
-            <p>{{item.contents}}</p>
+            <p class="status-contents">{{item.contents}}</p>
             <div class="img-box" v-for="(itemImg,index) in item.image" :key="index" >
                 <div>
                     <el-image class="commodity-img" :src="itemImg" :preview-src-list="[itemImg]" alt=""/>
@@ -63,6 +63,8 @@
                         <span class="user">{{item.commentUser}}</span>:
                     </info-dialog>
                     <span class="content">{{item.commentContent}}</span>
+                    <span class="delete delete-btn" @click="deleteComment(item)" v-if="uid == item.commentUser || utype === 'manager'">删除</span>
+
                 </p>
             </div>
         </div>
@@ -75,7 +77,8 @@ import {
     getUserInfo,
     getCommodityComment,
     addCommodityComment,
-    deleteUserCommodityStatus
+    deleteUserCommodityStatus,
+    deleteCommodityComment
 } from '../api/communication';
 import InfoDialog from './InfoDialog.vue';
 export default {
@@ -144,6 +147,17 @@ export default {
                 }
             }).catch(err=>console.log(err));
         },
+        deleteComment(item){
+            deleteCommodityComment({commentId: item.ccid}).then(res=>{
+                if(res.status === 200){
+                    this.$message({type: 'success', message: '删除评论成功'});
+                    this.getCommodityComment();
+                }else{
+                    console.log(res);
+                }
+            })
+            console.log('delete', item);
+        },
         listenerHandle(e){
             this.$refs.commentInput && this.commentInput && !this.$refs.commentInput.contains(e.target) ? 
             this.commentInput = false : '';
@@ -201,18 +215,17 @@ export default {
     .status-info-time{
         color: #aaa;
         font-size: 12px;
-        // line-height: 10px;
-        // vertical-align: text-top;
         margin-right: 5px;
     }
     .delete{
         font-size: 12px;
-        // line-height: 10px;
-        // vertical-align: text-top;
         color: #576C95;
         cursor: pointer;
+        &:hover{
+            color: #EC3941;
+        }
     }
-    p{
+    .status-contents{
         color: #181818;
         margin-bottom: 5px;
     }
@@ -250,11 +263,11 @@ export default {
                 text-align: center;
                 i{
                     font-size: 20px;
+                    vertical-align: bottom;
                 }
                 span{
                     margin-left: 2px;
                     font-size: 14px;
-                    vertical-align: top;
                 }
             }
         }
@@ -281,7 +294,10 @@ export default {
         font-size: 14px;
         background-color: #F7F7F8;
         .comment{
+            margin: 0;
+            padding: 5px 0;
             border-bottom: 1px solid #EAEAEA;
+            position: relative;
             .user{
                 color: #576C95;
                 margin: 0 2px 0 10px;
@@ -289,6 +305,14 @@ export default {
             }
             .content{
                 color: #181818;
+            }
+            .delete-btn{
+                position: absolute;
+                right: 5px;
+                top: 7px;
+                font-size: 12px;
+                transform: scale(0.9);
+                
             }
         }
     }
