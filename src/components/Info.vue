@@ -208,7 +208,9 @@ export default {
         submit(){
             this.changeInfoDialogVisible = false;
             let updateInfo = {};
+            delete this.changeInfo.utype
             for(var key in this.changeInfo){
+                console.log('this.changeInfo',this.changeInfo);
                 if(this.changeInfo[key].trim().length || key === 'styleText'){
                     this.changeInfo[key] !== this.info[key] ? updateInfo[key] = this.changeInfo[key] : '';
                 }else{
